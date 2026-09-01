@@ -25,7 +25,14 @@ public static class SystemMessageTable
                   3,
                    "YOU_DEALT_$1_DAMAGE_TO_$2",
                    "You dealt $1 damage to $2.")
-            }
+            },
+            {
+    4,
+    new SystemMessage(
+        4,
+        "YOU_HAVE_UNEQUIPPED_$1",
+        "You have unequipped $1.")
+}
         };
 
     public static SystemMessage Get(

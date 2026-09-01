@@ -44,11 +44,9 @@ public class InventorySlotUI :
 
     public void Clear()
     {
-        item =
-            null;
+        item = null;
 
-        itemIcon.sprite =
-            null;
+        itemIcon.sprite = null;
 
         itemIcon.gameObject.SetActive(
             false);

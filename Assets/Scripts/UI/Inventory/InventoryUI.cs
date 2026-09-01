@@ -13,7 +13,7 @@ public class InventoryUI : MonoBehaviour
     private ItemVisualDatabase itemVisualDatabase;
 
     [SerializeField]
-    private int slotCount = 20;
+    private int slotCount = 60;
 
     private readonly List<InventorySlotUI> slots =
         new();
@@ -35,6 +35,7 @@ public class InventoryUI : MonoBehaviour
 
         Refresh();
     }
+
     private void OnEnable()
     {
         if (slots.Count > 0)
@@ -42,11 +43,9 @@ public class InventoryUI : MonoBehaviour
             Refresh();
         }
     }
+
     public void Refresh()
     {
-
-        Debug.Log(
-    $"InventoryUI Refresh: {ClientInventory.Items.Count} items");
         foreach (InventorySlotUI slot in slots)
         {
             slot.Clear();
@@ -57,6 +56,11 @@ public class InventoryUI : MonoBehaviour
         foreach (ClientItemInstance item
             in ClientInventory.Items)
         {
+            // Equipped items belong visually
+            // in the equipment panel, not the bag grid.
+            if (item.IsEquipped)
+                continue;
+
             if (slotIndex >= slots.Count)
                 break;
 

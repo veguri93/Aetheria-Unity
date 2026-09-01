@@ -687,35 +687,58 @@ public static class ClientPacketHandler
             return;
         }
 
-        if (!ClientInventory.TryGetItem(
-                objectId,
-                out ClientItemInstance item))
+        if (!int.TryParse(
+                parts[2],
+                out int itemId))
         {
             return;
         }
 
+        if (!System.Enum.TryParse(
+                parts[3],
+                out EquipmentSlot slot))
+        {
+            Debug.LogWarning(
+                $"Unknown equipment slot: {parts[3]}");
+
+            return;
+        }
+
+
+
+        if (ClientInventory.TryGetItem(
+                objectId,
+                out ClientItemInstance item))
+        {
+            if (action == "EQUIP")
+            {
+                item.SetEquippedSlot(
+                    slot.ToString());
+            }
+            else if (action == "UNEQUIP")
+            {
+                item.SetEquippedSlot(
+                    "None");
+            }
+        }
+
         if (action == "EQUIP")
         {
-            string slot =
-                parts[3];
-
-            item.SetEquippedSlot(
+            EquipmentUI.Instance?.EquipItem(
+                objectId,
+                itemId,
                 slot);
         }
         else if (action == "UNEQUIP")
         {
-            item.SetEquippedSlot(
-                "None");
+            EquipmentUI.Instance?.UnequipItem(
+                slot);
         }
-
-        Debug.Log(
-            $"Equipment changed: {data}");
 
         InventoryUI inventoryUI =
             Object.FindAnyObjectByType<InventoryUI>();
 
-        if (inventoryUI != null)
-            inventoryUI.Refresh();
+        inventoryUI?.Refresh();
     }
 
     private static void HandleInventorySnapshot(
@@ -816,8 +839,21 @@ public static class ClientPacketHandler
             return;
         }
 
+        string text =
+            message.Text;
+
+        for (int i = 1;
+             i < parts.Length;
+             i++)
+        {
+            text =
+                text.Replace(
+                    $"${i}",
+                    parts[i]);
+        }
+
         ChatManager.Instance?.AddCombatMessage(
             GameMessageType.System,
-            message.Text);
+            text);
     }
 }
