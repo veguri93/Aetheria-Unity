@@ -207,6 +207,31 @@ public class GameServerConnection : MonoBehaviour
                 $"Failed to send respawn request: {ex.Message}");
         }
     }
+    public async void SendItemActionRequest(
+    int objectId)
+    {
+        try
+        {
+            if (_client == null || !_client.Connected)
+                return;
+
+            string data =
+                objectId.ToString();
+
+            byte[] packet =
+                BuildPacket(
+                    21,
+                    data);
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send item action request: {ex.Message}");
+        }
+    }
 
     private byte[] BuildPacket(ushort packetType, string data)
     {

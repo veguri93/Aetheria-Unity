@@ -5,5 +5,6 @@ public enum GameMessageType
     DamageTaken,
     Critical,
     Kill,
-    Reward
+    Reward,
+    Normal
 }

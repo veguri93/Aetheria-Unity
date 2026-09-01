@@ -31,6 +31,7 @@ public class ChatManager : MonoBehaviour
     [SerializeField] private Color _generalChatColor = new Color(0.7f, 1f, 0.8f);
     [SerializeField] private Color _clanChatColor = new Color(0.8f, 0.6f, 1f);
     [SerializeField] private Color _globalChatColor = new Color(1f, 0.5f, 0.05f);
+    [SerializeField] private Color _normalCombatColor = Color.white;
 
     private void Awake()
     {
@@ -63,6 +64,7 @@ public class ChatManager : MonoBehaviour
     public void AddMessage(
         ChatType type,
         ChatScope scope,
+        string senderName,
         string message)
     {
         if (string.IsNullOrWhiteSpace(message))
@@ -76,7 +78,8 @@ public class ChatManager : MonoBehaviour
                 _messagePrefab,
                 _chatContent);
 
-        newMessage.text = message;
+        newMessage.text =
+    senderName + ": " + message;
 
         if (scope == ChatScope.Global)
         {
@@ -140,6 +143,10 @@ public class ChatManager : MonoBehaviour
 
             case GameMessageType.Reward:
                 newMessage.color = _rewardColor;
+                break;
+
+            case GameMessageType.Normal:
+                newMessage.color = _normalCombatColor;
                 break;
         }
 
@@ -206,5 +213,28 @@ public class ChatManager : MonoBehaviour
 
         _chatInput.text = string.Empty;
         _chatInput.ActivateInputField();
+    }
+
+    public string ColorText(
+    GameMessageType type,
+    string text)
+    {
+        Color color = type switch
+        {
+            GameMessageType.System => _systemColor,
+            GameMessageType.DamageDealt => _damageDealtColor,
+            GameMessageType.DamageTaken => _damageTakenColor,
+            GameMessageType.Critical => _criticalColor,
+            GameMessageType.Kill => _killColor,
+            GameMessageType.Reward => _rewardColor,
+            GameMessageType.Normal => _normalCombatColor,
+            _ => _normalCombatColor
+        };
+
+        string hex =
+            ColorUtility.ToHtmlStringRGB(
+                color);
+
+        return $"<color=#{hex}>{text}</color>";
     }
 }

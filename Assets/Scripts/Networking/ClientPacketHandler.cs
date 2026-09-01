@@ -64,11 +64,28 @@ public static class ClientPacketHandler
                 HandlePlayerRespawn(packet);
                 break;
 
+            case 20:
+                HandleCharacterStats(packet);
+                break;
+
+            case 23:
+                HandleEquipmentChanged(packet);
+                break;
+
+            case 24:
+                HandleInventorySnapshot(packet);
+                break;
+
+            case 25:
+                HandleSystemMessage(packet);
+                break;
+
             default:
                 Debug.LogWarning(
                     $"Unknown packet type: {packet.Type}");
                 break;
         }
+
     }
 
     private static void HandleMonsterDamage(
@@ -114,9 +131,32 @@ public static class ClientPacketHandler
                 currentHp,
                 maxHp);
 
-            ChatManager.Instance?.AddCombatMessage(
-                GameMessageType.DamageDealt,
-                $"You dealt {damage} damage to {npcName}.");
+            if (ChatManager.Instance != null)
+            {
+                SystemMessage message =
+                    SystemMessageTable.Get(3);
+
+                if (message != null)
+                {
+                    string coloredDamage =
+                        ChatManager.Instance.ColorText(
+                            GameMessageType.DamageDealt,
+                            damage.ToString());
+
+                    string text =
+                        message.Text
+                            .Replace(
+                                "$1",
+                                coloredDamage)
+                            .Replace(
+                                "$2",
+                                npcName);
+
+                    ChatManager.Instance.AddCombatMessage(
+                        GameMessageType.Normal,
+                        text);
+                }
+            }
 
             return;
         }
@@ -232,15 +272,16 @@ public static class ClientPacketHandler
 
         string[] parts = data.Split(
             '|',
-            3,
+            4,
             System.StringSplitOptions.None);
 
-        if (parts.Length != 3)
+        if (parts.Length != 4)
             return;
 
         string chatType = parts[0];
         string chatScope = parts[1];
-        string message = parts[2];
+        string senderName = parts[2];
+        string message = parts[3];
 
         if (ChatManager.Instance == null)
             return;
@@ -255,6 +296,7 @@ public static class ClientPacketHandler
             ChatManager.Instance.AddMessage(
                 type,
                 scope,
+                senderName,
                 message);
         }
     }
@@ -582,5 +624,200 @@ public static class ClientPacketHandler
 
         RespawnWindow.Instance?.Hide();
     }
+    private static void HandleCharacterStats(
+    ClientPacket packet)
+    {
+        string data =
+            Encoding.UTF8.GetString(
+                packet.Data);
 
+        string[] parts =
+            data.Split('|');
+
+        if (parts.Length != 7)
+            return;
+
+        if (!int.TryParse(parts[0], out int maxHp) ||
+            !int.TryParse(parts[1], out int physicalAttack) ||
+            !int.TryParse(parts[2], out int physicalDefense) ||
+            !int.TryParse(parts[3], out int magicAttack) ||
+            !int.TryParse(parts[4], out int magicDefense) ||
+            !int.TryParse(parts[5], out int attackSpeed) ||
+            !int.TryParse(parts[6], out int castingSpeed))
+        {
+            return;
+        }
+
+        PlayerStatsUI statsUI =
+            Object.FindAnyObjectByType<PlayerStatsUI>();
+
+        if (statsUI == null)
+            return;
+
+        statsUI.SetStats(
+            maxHp,
+            physicalAttack,
+            physicalDefense,
+            magicAttack,
+            magicDefense,
+            attackSpeed,
+            castingSpeed);
+    }
+
+    private static void HandleEquipmentChanged(
+        ClientPacket packet)
+    {
+        string data =
+            Encoding.UTF8.GetString(
+                packet.Data);
+
+        string[] parts =
+            data.Split('|');
+
+        if (parts.Length != 4)
+            return;
+
+        string action =
+            parts[0];
+
+        if (!int.TryParse(
+                parts[1],
+                out int objectId))
+        {
+            return;
+        }
+
+        if (!ClientInventory.TryGetItem(
+                objectId,
+                out ClientItemInstance item))
+        {
+            return;
+        }
+
+        if (action == "EQUIP")
+        {
+            string slot =
+                parts[3];
+
+            item.SetEquippedSlot(
+                slot);
+        }
+        else if (action == "UNEQUIP")
+        {
+            item.SetEquippedSlot(
+                "None");
+        }
+
+        Debug.Log(
+            $"Equipment changed: {data}");
+
+        InventoryUI inventoryUI =
+            Object.FindAnyObjectByType<InventoryUI>();
+
+        if (inventoryUI != null)
+            inventoryUI.Refresh();
+    }
+
+    private static void HandleInventorySnapshot(
+        ClientPacket packet)
+    {
+        string data =
+            Encoding.UTF8.GetString(
+                packet.Data);
+
+        ClientInventory.Clear();
+
+        if (string.IsNullOrWhiteSpace(data))
+        {
+            Debug.Log(
+                "Inventory loaded: 0 items.");
+
+            return;
+        }
+
+        string[] entries =
+            data.Split(
+                ';',
+                System.StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (string entry in entries)
+        {
+            string[] parts =
+                entry.Split(',');
+
+            if (parts.Length != 4)
+                continue;
+
+            if (!int.TryParse(
+                    parts[0],
+                    out int objectId) ||
+                !int.TryParse(
+                    parts[1],
+                    out int itemId) ||
+                !int.TryParse(
+                    parts[2],
+                    out int quantity))
+            {
+                continue;
+            }
+
+            string equippedSlot =
+                parts[3];
+
+            ClientItemInstance item =
+                new(
+                    objectId,
+                    itemId,
+                    quantity,
+                    equippedSlot);
+
+            ClientInventory.Add(
+                item);
+        }
+
+        Debug.Log(
+            $"Inventory loaded: " +
+            $"{ClientInventory.Items.Count} items.");
+
+        InventoryUI inventoryUI =
+    Object.FindAnyObjectByType<InventoryUI>();
+
+        if (inventoryUI != null)
+        {
+            inventoryUI.Refresh();
+        }
+    }
+    private static void HandleSystemMessage(
+        ClientPacket packet)
+    {
+        string data =
+            Encoding.UTF8.GetString(
+                packet.Data);
+
+        string[] parts =
+            data.Split('|');
+
+        if (!int.TryParse(
+                parts[0],
+                out int messageId))
+        {
+            return;
+        }
+
+        SystemMessage message =
+            SystemMessageTable.Get(
+                messageId);
+
+        if (message == null)
+        {
+            Debug.LogWarning(
+                $"Unknown system message ID: {messageId}");
+
+            return;
+        }
+
+        ChatManager.Instance?.AddCombatMessage(
+            GameMessageType.System,
+            message.Text);
+    }
 }
