@@ -84,6 +84,14 @@ public static class ClientPacketHandler
                 HandleCharacterProgress(packet);
                 break;
 
+            case 28:
+                HandleGroundItemSpawn(packet);
+                break;
+
+            case 29:
+                HandleGroundItemDespawn(packet);
+                break;
+
             default:
                 Debug.LogWarning(
                     $"Unknown packet type: {packet.Type}");
@@ -904,5 +912,78 @@ public static class ClientPacketHandler
     experience,
     currentLevelExperience,
     nextLevelExperience);
+    }
+
+    private static void HandleGroundItemSpawn(
+    ClientPacket packet)
+    {
+        string data =
+            Encoding.UTF8.GetString(
+                packet.Data);
+
+        string[] parts =
+            data.Split('|');
+
+        if (parts.Length != 6)
+        {
+            Debug.LogWarning(
+                $"[GROUND ITEM] Invalid spawn packet: {data}");
+
+            return;
+        }
+
+        if (!int.TryParse(
+                parts[0],
+                out int objectId) ||
+            !int.TryParse(
+                parts[1],
+                out int itemId) ||
+            !int.TryParse(
+                parts[2],
+                out int quantity) ||
+            !float.TryParse(
+                parts[3],
+                out float x) ||
+            !float.TryParse(
+                parts[4],
+                out float y) ||
+            !float.TryParse(
+                parts[5],
+                out float z))
+        {
+            Debug.LogWarning(
+                $"[GROUND ITEM] Could not parse spawn packet: {data}");
+
+            return;
+        }
+
+        GroundItemManager.Instance?.Spawn(
+            objectId,
+            itemId,
+            quantity,
+            new Vector3(
+                x,
+                y,
+                z));
+    }
+    private static void HandleGroundItemDespawn(
+    ClientPacket packet)
+    {
+        string data =
+            Encoding.UTF8.GetString(
+                packet.Data);
+
+        if (!int.TryParse(
+                data,
+                out int objectId))
+        {
+            Debug.LogWarning(
+                $"[GROUND ITEM] Invalid despawn packet: {data}");
+
+            return;
+        }
+
+        GroundItemManager.Instance?.Despawn(
+            objectId);
     }
 }

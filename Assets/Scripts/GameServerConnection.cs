@@ -261,6 +261,82 @@ public class GameServerConnection : MonoBehaviour
                 $"Failed to send unequip item request: {ex.Message}");
         }
     }
+
+    public async void SendDropItemRequest(
+    int objectId,
+    int quantity)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (objectId <= 0 ||
+                quantity <= 0)
+            {
+                return;
+            }
+
+            string data =
+                string.Join(
+                    "|",
+                    objectId,
+                    quantity);
+
+            byte[] packet =
+                BuildPacket(
+                    27,
+                    data);
+
+            await _client
+                .GetStream()
+                .WriteAsync(packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send drop item request: {ex.Message}");
+        }
+    }
+    public async void SendPickupItemRequest(
+    int objectId)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (objectId <= 0)
+                return;
+
+            string data =
+                objectId.ToString();
+
+            Debug.Log(
+                $"[PICKUP] Sending PickupItemRequest. " +
+                $"ObjectId={objectId}");
+
+            byte[] packet =
+                BuildPacket(
+                    30,
+                    data);
+
+            await _client
+                .GetStream()
+                .WriteAsync(packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send pickup item request: {ex.Message}");
+        }
+    }
     private byte[] BuildPacket(ushort packetType, string data)
     {
         byte[] dataBytes = Encoding.UTF8.GetBytes(data);

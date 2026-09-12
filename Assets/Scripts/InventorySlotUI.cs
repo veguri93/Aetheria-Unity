@@ -98,6 +98,15 @@ IPointerExitHandler
         if (item == null)
             return;
 
+        if (eventData.button ==
+    PointerEventData.InputButton.Right)
+        {
+            InventoryItemContextMenu.Instance?.Show(
+    item,
+    transform as RectTransform);
+            return;
+        }
+
         if (eventData.button !=
             PointerEventData.InputButton.Left)
         {

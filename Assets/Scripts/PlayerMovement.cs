@@ -33,47 +33,70 @@ public class PlayerMovement : MonoBehaviour
         if (!_isMoving)
             return;
 
-        Vector3 direction = _destination - transform.position;
+        Vector3 direction =
+            _destination - transform.position;
+
         direction.y = 0;
 
-        float distance = direction.magnitude;
+        float distance =
+            direction.magnitude;
 
         if (distance <= 0.1f)
         {
-            _isMoving = false;
-            _animator.SetBool("Moving", false);
+            Stop();
             return;
         }
 
         direction.Normalize();
 
-        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        Quaternion targetRotation =
+            Quaternion.LookRotation(direction);
 
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation,
-            targetRotation,
-            _rotationSpeed * Time.deltaTime);
+        transform.rotation =
+            Quaternion.Slerp(
+                transform.rotation,
+                targetRotation,
+                _rotationSpeed * Time.deltaTime);
 
-        _controller.Move(direction * _moveSpeed * Time.deltaTime);
+        _controller.Move(
+            direction *
+            _moveSpeed *
+            Time.deltaTime);
     }
 
     public void MoveTo(Vector3 position)
     {
-       
-
         _destination = position;
         _isMoving = true;
-        _animator.SetBool("Moving", true);
+
+        _animator.SetBool(
+            "Moving",
+            true);
+    }
+
+    public void Stop()
+    {
+        _destination =
+            transform.position;
+
+        _isMoving = false;
+
+        _animator.SetBool(
+            "Moving",
+            false);
     }
 
     public void LookAt(Vector3 position)
     {
-        Vector3 direction = position - transform.position;
+        Vector3 direction =
+            position - transform.position;
+
         direction.y = 0f;
 
         if (direction.sqrMagnitude < 0.001f)
             return;
 
-        transform.rotation = Quaternion.LookRotation(direction);
+        transform.rotation =
+            Quaternion.LookRotation(direction);
     }
 }

@@ -183,4 +183,11 @@ public class InventoryUI : MonoBehaviour
             definition,
             itemRect);
     }
+
+    private void OnDisable()
+    {
+        InventoryItemContextMenu.Instance?.Hide();
+        ItemTooltipUI.Instance?.Hide();
+    }
+
 }

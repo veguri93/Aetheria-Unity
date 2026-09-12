@@ -37,3 +37,33 @@ MonoBehaviour:
     description: sword 1 handed
     icon: {fileID: 21300000, guid: c83ae78e3803de2479963f3fd208c528, type: 3}
     prefab: {fileID: 0}
+  - itemId: 3000
+    itemName: armor
+    type: helmet
+    description: first set
+    icon: {fileID: 21300000, guid: 6b3acf92241e7e14a9d0f429c0a52835, type: 3}
+    prefab: {fileID: 0}
+  - itemId: 3001
+    itemName: armor
+    type: chest
+    description: first set
+    icon: {fileID: 21300000, guid: 3dbe555a520d86a498468e9e94dfd158, type: 3}
+    prefab: {fileID: 0}
+  - itemId: 3002
+    itemName: armor
+    type: gloves
+    description: first set
+    icon: {fileID: 21300000, guid: f4823541396eecd4a92bb93c5ea7818d, type: 3}
+    prefab: {fileID: 0}
+  - itemId: 3003
+    itemName: armor
+    type: legs
+    description: first set
+    icon: {fileID: 21300000, guid: cf30c5b1b746b9c46a1fbb24dce9029d, type: 3}
+    prefab: {fileID: 0}
+  - itemId: 3004
+    itemName: armor
+    type: feet
+    description: first set
+    icon: {fileID: 21300000, guid: 62149e144efcef1449472485225641f3, type: 3}
+    prefab: {fileID: 0}

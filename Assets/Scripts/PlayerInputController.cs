@@ -60,20 +60,39 @@ public class PlayerInputController : MonoBehaviour
         Vector2 mousePosition =
             _controls.Player.MousePosition.ReadValue<Vector2>();
 
-        Ray ray = _camera.ScreenPointToRay(mousePosition);
+        Ray ray =
+            _camera.ScreenPointToRay(mousePosition);
 
-        if (!Physics.Raycast(ray, out RaycastHit hit))
+        if (!Physics.Raycast(
+                ray,
+                out RaycastHit hit))
+        {
             return;
+        }
 
         Monster monster =
             hit.collider.GetComponentInParent<Monster>();
 
         if (monster != null)
         {
-            _player.Interaction.OnMonsterClicked(monster);
+            _player.Interaction.OnMonsterClicked(
+                monster);
+
             return;
         }
 
-        _player.Interaction.OnGroundClicked(hit.point);
+        WorldItemDrop worldItem =
+            hit.collider.GetComponentInParent<WorldItemDrop>();
+
+        if (worldItem != null)
+        {
+            _player.Interaction.OnWorldItemClicked(
+                worldItem);
+
+            return;
+        }
+
+        _player.Interaction.OnGroundClicked(
+            hit.point);
     }
 }

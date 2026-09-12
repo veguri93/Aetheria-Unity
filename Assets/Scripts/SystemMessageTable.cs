@@ -46,7 +46,37 @@ public static class SystemMessageTable
         6,
         "YOUR_LEVEL_HAS_INCREASED_TO_$1",
         "Your level has increased to $1.")
-}
+},
+{
+    7,
+    new SystemMessage(
+        7,
+        "YOU_ARE_NOW_AFFECTED_BY_$1",
+        "You are now affected by $1.")
+},
+{
+    8,
+    new SystemMessage(
+        8,
+        "YOU_ARE_NO_LONGER_AFFECTED_BY_$1",
+        "You are no longer affected by $1.")
+            },
+
+            {
+                9,
+                new SystemMessage(
+                    9,
+                    "YOU_HAVE_PICKED_UP_$1",
+                    "You have picked up $1.")
+            },
+
+            {
+                10,
+                new SystemMessage(
+                    10,
+                    "YOU_HAVE_FAILED_TO_PICK_UP_$1",
+                    "You have failed to pick up $1.")
+            }
         };
 
     public static SystemMessage Get(
