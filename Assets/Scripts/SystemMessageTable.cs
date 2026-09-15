@@ -76,7 +76,30 @@ public static class SystemMessageTable
                     10,
                     "YOU_HAVE_FAILED_TO_PICK_UP_$1",
                     "You have failed to pick up $1.")
-            }
+            },
+            {
+    11,
+    new SystemMessage(
+        11,
+        "YOU_HAVE_USED_$1_SKILL",
+        "You have used $1.")
+},
+
+{
+    12,
+    new SystemMessage(
+        12,
+        "$1_IS_ON_COOLDOWN",
+        "$1 is on cooldown.")
+},
+
+{
+    13,
+    new SystemMessage(
+        13,
+        "NOT_ENOUGH_MP",
+        "Not enough MP.")
+}
         };
 
     public static SystemMessage Get(

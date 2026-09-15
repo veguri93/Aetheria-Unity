@@ -92,6 +92,18 @@ public static class ClientPacketHandler
                 HandleGroundItemDespawn(packet);
                 break;
 
+            case 31:
+                HandlePlayerHealthChanged(packet);
+                break;
+
+            case 32:
+                HandleMonsterHealthChanged(packet);
+                break;
+
+            case 34:
+                HandlePlayerManaChanged(packet);
+                break;
+
             default:
                 Debug.LogWarning(
                     $"Unknown packet type: {packet.Type}");
@@ -571,6 +583,13 @@ public static class ClientPacketHandler
             currentHp,
             maxHp);
 
+        PlayerStatsUI statsUI =
+    Object.FindAnyObjectByType<PlayerStatsUI>();
+
+        statsUI?.SetHealth(
+            currentHp,
+            maxHp);
+
         string npcName = "Unknown NPC";
 
         if (NpcTemplateManager.Instance != null &&
@@ -632,7 +651,12 @@ public static class ClientPacketHandler
             return;
 
         health.Respawn();
+        PlayerStatsUI statsUI =
+    Object.FindAnyObjectByType<PlayerStatsUI>();
 
+        statsUI?.SetHealth(
+            currentHp,
+            maxHp);
         localPlayer.SetSpawnPosition(
             new Vector3(x, y, z),
             0f);
@@ -986,4 +1010,116 @@ public static class ClientPacketHandler
         GroundItemManager.Instance?.Despawn(
             objectId);
     }
+    private static void HandlePlayerHealthChanged(
+    ClientPacket packet)
+    {
+        string data =
+            Encoding.UTF8.GetString(
+                packet.Data);
+
+        string[] parts =
+            data.Split('|');
+
+        if (parts.Length != 2)
+            return;
+
+        if (!int.TryParse(
+                parts[0],
+                out int currentHp) ||
+            !int.TryParse(
+                parts[1],
+                out int maxHp))
+        {
+            return;
+        }
+
+        PlayerHealth health =
+            Object.FindAnyObjectByType<PlayerHealth>();
+
+        if (health == null)
+            return;
+
+        health.SetServerHealth(
+            currentHp,
+            maxHp);
+
+        PlayerStatsUI statsUI =
+    Object.FindAnyObjectByType<PlayerStatsUI>();
+
+        statsUI?.SetHealth(
+            currentHp,
+            maxHp);
+    }
+    private static void HandleMonsterHealthChanged(
+    ClientPacket packet)
+    {
+        string data =
+            Encoding.UTF8.GetString(
+                packet.Data);
+
+        string[] parts =
+            data.Split('|');
+
+        if (parts.Length != 3)
+            return;
+
+        if (!int.TryParse(
+                parts[0],
+                out int objectId) ||
+            !int.TryParse(
+                parts[1],
+                out int currentHp) ||
+            !int.TryParse(
+                parts[2],
+                out int maxHp))
+        {
+            return;
+        }
+
+        if (MonsterManager.Instance == null)
+            return;
+
+        if (!MonsterManager.Instance.TryGetMonster(
+                objectId,
+                out Monster monster))
+        {
+            return;
+        }
+
+        monster.SetServerHealth(
+            currentHp,
+            maxHp);
+    }
+
+    private static void HandlePlayerManaChanged(
+    ClientPacket packet)
+    {
+        string data =
+            Encoding.UTF8.GetString(
+                packet.Data);
+
+        string[] parts =
+            data.Split('|');
+
+        if (parts.Length != 2)
+            return;
+
+        if (!int.TryParse(
+                parts[0],
+                out int currentMp) ||
+            !int.TryParse(
+                parts[1],
+                out int maxMp))
+        {
+            return;
+        }
+
+        PlayerStatsUI statsUI =
+            Object.FindAnyObjectByType<PlayerStatsUI>();
+
+        statsUI?.SetMana(
+            currentMp,
+            maxMp);
+    }
+
 }

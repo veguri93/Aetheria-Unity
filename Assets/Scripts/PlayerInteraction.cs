@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(PlayerMovement))]
 public class PlayerInteraction : MonoBehaviour
@@ -10,6 +11,8 @@ public class PlayerInteraction : MonoBehaviour
 
     private const float PickupRange = 2f;
 
+    private const int TestHealSkillId = 10001;
+
     private void Awake()
     {
         _movement = GetComponent<PlayerMovement>();
@@ -18,6 +21,8 @@ public class PlayerInteraction : MonoBehaviour
 
     private void Update()
     {
+        HandleTestHealHotkey();
+
         if (pendingPickup == null)
             return;
 
@@ -31,6 +36,41 @@ public class PlayerInteraction : MonoBehaviour
 
         TryPickup(
             pendingPickup);
+    }
+
+    private void HandleTestHealHotkey()
+    {
+        if (Keyboard.current == null)
+            return;
+
+        if (!Keyboard.current.hKey.wasPressedThisFrame)
+            return;
+
+        if (TargetManager.Instance == null)
+            return;
+
+        Monster target =
+            TargetManager.Instance.CurrentTarget;
+
+        if (target == null)
+        {
+            Debug.LogWarning(
+                "[SKILL] Heal test failed: no monster targeted.");
+
+            return;
+        }
+
+        Debug.Log(
+            $"[SKILL] Test Heal requested. " +
+            $"SkillId={TestHealSkillId}, " +
+            $"TargetObjectId={target.ObjectId}");
+
+        GameServerConnection.Instance?
+            .SendSkillUseRequest(
+                TestHealSkillId,
+                "Monster",
+                target.ObjectId,
+                false);
     }
 
     public void OnGroundClicked(Vector3 position)

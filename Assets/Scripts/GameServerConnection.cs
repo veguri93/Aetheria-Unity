@@ -337,6 +337,62 @@ public class GameServerConnection : MonoBehaviour
                 $"Failed to send pickup item request: {ex.Message}");
         }
     }
+
+    public async void SendSkillUseRequest(
+    int skillId,
+    string targetEntityType,
+    int targetObjectId,
+    bool forceUse)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (skillId <= 0 ||
+                targetObjectId <= 0 ||
+                string.IsNullOrWhiteSpace(
+                    targetEntityType))
+            {
+                return;
+            }
+
+            string data =
+                string.Join(
+                    "|",
+                    skillId,
+                    targetEntityType,
+                    targetObjectId,
+                    forceUse);
+
+            Debug.Log(
+                $"[SKILL] Sending SkillUseRequest. " +
+                $"SkillId={skillId}, " +
+                $"TargetType={targetEntityType}, " +
+                $"TargetObjectId={targetObjectId}, " +
+                $"ForceUse={forceUse}");
+
+            byte[] packet =
+                BuildPacket(
+                    33,
+                    data);
+
+            await _client
+                .GetStream()
+                .WriteAsync(
+                    packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send skill use request: " +
+                $"{ex.Message}");
+        }
+    }
+
     private byte[] BuildPacket(ushort packetType, string data)
     {
         byte[] dataBytes = Encoding.UTF8.GetBytes(data);

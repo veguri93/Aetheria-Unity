@@ -6,7 +6,6 @@ public class PlayerHealth : MonoBehaviour
     private int _maxHp = 100;
 
     private int _currentHp;
-    private PlayerHealthBar _healthBar;
     private Animator _animator;
 
     private bool _isDead;
@@ -17,18 +16,15 @@ public class PlayerHealth : MonoBehaviour
 
     private void Awake()
     {
-        _currentHp = _maxHp;
-
-        _healthBar =
-            FindAnyObjectByType<PlayerHealthBar>();
+        _currentHp =
+            _maxHp;
 
         _animator =
             GetComponentInChildren<Animator>();
-
-        UpdateHealthBar();
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(
+        int damage)
     {
         if (damage <= 0)
             return;
@@ -41,9 +37,21 @@ public class PlayerHealth : MonoBehaviour
         if (_currentHp < 0)
             _currentHp = 0;
 
+        if (_currentHp <= 0)
+        {
+            Die();
+        }
+    }
 
+    public void SetServerHealth(
+        int currentHp,
+        int maxHp)
+    {
+        _currentHp =
+            currentHp;
 
-        UpdateHealthBar();
+        _maxHp =
+            maxHp;
 
         if (_currentHp <= 0)
         {
@@ -53,6 +61,9 @@ public class PlayerHealth : MonoBehaviour
 
     private void Die()
     {
+        if (_isDead)
+            return;
+
         _isDead = true;
 
         PlayerCombat combat =
@@ -73,13 +84,17 @@ public class PlayerHealth : MonoBehaviour
 
         if (_animator != null)
         {
-            _animator.SetTrigger("Death");
+            _animator.SetTrigger(
+                "Death");
         }
     }
+
     public void Respawn()
     {
         _isDead = false;
-        _currentHp = _maxHp;
+
+        _currentHp =
+            _maxHp;
 
         PlayerMovement movement =
             GetComponent<PlayerMovement>();
@@ -93,37 +108,10 @@ public class PlayerHealth : MonoBehaviour
         {
             _animator.Rebind();
             _animator.Update(0f);
-            _animator.Play("Idle", 0, 0f);
-
-            Debug.Log(
-                $"RESPAWN: Animator={_animator.name}, " +
-                $"State={_animator.GetCurrentAnimatorStateInfo(0).shortNameHash}");
-        }
-
-        UpdateHealthBar();
-    }
-    private void UpdateHealthBar()
-    {
-        if (_healthBar == null)
-            return;
-
-        _healthBar.SetHealth(
-            _currentHp,
-            _maxHp);
-    }
-
-    public void SetServerHealth(
-    int currentHp,
-    int maxHp)
-    {
-        _currentHp = currentHp;
-        _maxHp = maxHp;
-
-        UpdateHealthBar();
-
-        if (_currentHp <= 0)
-        {
-            Die();
+            _animator.Play(
+                "Idle",
+                0,
+                0f);
         }
     }
 }
