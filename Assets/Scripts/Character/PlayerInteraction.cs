@@ -124,10 +124,7 @@ public class PlayerInteraction : MonoBehaviour
             return;
         }
 
-        Debug.Log(
-            $"[SHORTCUT] F{slotNumber} using skill. " +
-            $"SkillId={skillId}, " +
-            $"TargetObjectId={target.ObjectId}");
+
 
         GameServerConnection.Instance?
             .SendSkillUseRequest(
@@ -152,10 +149,6 @@ public class PlayerInteraction : MonoBehaviour
             return;
         }
 
-        Debug.Log(
-            $"[SHORTCUT] F{slotNumber} using item. " +
-            $"ItemId={itemId}, " +
-            $"ObjectId={item.ObjectId}");
 
         GameServerConnection.Instance?
             .SendItemActionRequest(
@@ -213,10 +206,7 @@ public class PlayerInteraction : MonoBehaviour
                 transform.position,
                 worldItem.transform.position);
 
-        Debug.Log(
-            $"[PICKUP] Item clicked. " +
-            $"ObjectId={worldItem.ObjectId}, " +
-            $"Distance={distance:F2}");
+
 
         if (distance <= PickupRange)
         {
@@ -252,9 +242,7 @@ public class PlayerInteraction : MonoBehaviour
 
         _movement.Stop();
 
-        Debug.Log(
-            $"[PICKUP] Reached pickup range. " +
-            $"Sending request for ObjectId={objectId}");
+
 
         GameServerConnection.Instance?
             .SendPickupItemRequest(

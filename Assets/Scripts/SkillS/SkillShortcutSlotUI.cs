@@ -170,11 +170,8 @@ public class SkillShortcutSlotUI :
             dragSource.ShortcutReferenceId,
             dragSource.ShortcutIcon);
 
-        Debug.Log(
-            $"[SHORTCUT] Assigned " +
-            $"{dragSource.ShortcutType} " +
-            $"{dragSource.ShortcutReferenceId} " +
-            $"to F{slotNumber}.");
+        SaveShortcutState();
+
     }
 
     private void HandleShortcutSlotDrop(
@@ -227,10 +224,10 @@ public class SkillShortcutSlotUI :
         sourceSlot.dragDropHandled =
             true;
 
-        Debug.Log(
-            $"[SHORTCUT] Moved shortcut " +
-            $"from F{sourceSlot.SlotNumber} " +
-            $"to F{slotNumber}.");
+        SaveShortcutState();
+        sourceSlot.SaveShortcutState();
+
+
     }
 
     public void OnPointerClick(
@@ -332,10 +329,20 @@ public class SkillShortcutSlotUI :
         if (dragDropHandled)
             return;
 
-        Debug.Log(
-            $"[SHORTCUT] Removed shortcut from F{slotNumber}.");
 
         ClearShortcut();
+
+        SaveShortcutState();
+    }
+
+    private void SaveShortcutState()
+    {
+        GameServerConnection.Instance?
+            .SendShortcutUpdateRequest(
+                0,
+                slotNumber,
+                shortcutType,
+                referenceId);
     }
 
     private static IShortcutDragSource FindShortcutDragSource(

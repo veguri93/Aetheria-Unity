@@ -26,8 +26,7 @@ public class EquipmentUI : MonoBehaviour
             _slots[slotUI.Slot] = slotUI;
         }
 
-        Debug.Log(
-            $"Equipment UI loaded {_slots.Count} slots.");
+
     }
 
     private void OnEnable()

@@ -7,6 +7,9 @@ public class SkillShortcutBarUI : MonoBehaviour
     private SkillDatabase skillDatabase;
 
     [SerializeField]
+    private ItemVisualDatabase itemVisualDatabase;
+
+    [SerializeField]
     private SkillShortcutSlotUI slotPrefab;
 
     [SerializeField]
@@ -19,11 +22,14 @@ public class SkillShortcutBarUI : MonoBehaviour
 
     private void Start()
     {
-        CreateSlots();
+        EnsureSlotsCreated();
     }
 
-    private void CreateSlots()
+    private void EnsureSlotsCreated()
     {
+        if (slots.Count > 0)
+            return;
+
         for (int i = 1;
              i <= SlotCount;
              i++)
@@ -41,10 +47,51 @@ public class SkillShortcutBarUI : MonoBehaviour
         }
     }
 
+    public void ClearAllShortcuts()
+    {
+        EnsureSlotsCreated();
+
+        foreach (SkillShortcutSlotUI slot in slots)
+        {
+            slot.ClearShortcut();
+        }
+    }
+
+    public void LoadShortcut(
+        int slotNumber,
+        ShortcutType shortcutType,
+        int referenceId)
+    {
+        EnsureSlotsCreated();
+
+        if (slotNumber < 1 ||
+            slotNumber > slots.Count)
+        {
+            return;
+        }
+
+        switch (shortcutType)
+        {
+            case ShortcutType.Skill:
+                SetSkill(
+                    slotNumber,
+                    referenceId);
+                break;
+
+            case ShortcutType.Item:
+                SetItem(
+                    slotNumber,
+                    referenceId);
+                break;
+        }
+    }
+
     public void SetSkill(
         int slotNumber,
         int skillId)
     {
+        EnsureSlotsCreated();
+
         if (slotNumber < 1 ||
             slotNumber > slots.Count)
         {
@@ -65,11 +112,40 @@ public class SkillShortcutBarUI : MonoBehaviour
             skill);
     }
 
+    public void SetItem(
+        int slotNumber,
+        int itemId)
+    {
+        EnsureSlotsCreated();
+
+        if (slotNumber < 1 ||
+            slotNumber > slots.Count)
+        {
+            return;
+        }
+
+        if (!itemVisualDatabase.TryGet(
+                itemId,
+                out ItemVisualDefinition definition))
+        {
+            Debug.LogWarning(
+                $"Item {itemId} was not found in ItemVisualDatabase.");
+
+            return;
+        }
+
+        slots[slotNumber - 1].SetItem(
+            itemId,
+            definition.Icon);
+    }
+
     public bool TryGetShortcut(
         int slotNumber,
         out ShortcutType shortcutType,
         out int referenceId)
     {
+        EnsureSlotsCreated();
+
         shortcutType =
             ShortcutType.None;
 
@@ -97,8 +173,6 @@ public class SkillShortcutBarUI : MonoBehaviour
         return true;
     }
 
-    // Temporary compatibility with our current
-    // PlayerInteraction code.
     public int GetSkillId(
         int slotNumber)
     {

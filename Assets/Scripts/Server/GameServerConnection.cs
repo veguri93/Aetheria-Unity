@@ -12,8 +12,6 @@ public class GameServerConnection : MonoBehaviour
     {
         Instance = this;
 
-        Debug.Log(
-            $"GameServerConnection Awake on: {gameObject.name}");
     }
 
     private async void Start()
@@ -318,9 +316,7 @@ public class GameServerConnection : MonoBehaviour
             string data =
                 objectId.ToString();
 
-            Debug.Log(
-                $"[PICKUP] Sending PickupItemRequest. " +
-                $"ObjectId={objectId}");
+
 
             byte[] packet =
                 BuildPacket(
@@ -368,12 +364,6 @@ public class GameServerConnection : MonoBehaviour
                     targetObjectId,
                     forceUse);
 
-            Debug.Log(
-                $"[SKILL] Sending SkillUseRequest. " +
-                $"SkillId={skillId}, " +
-                $"TargetType={targetEntityType}, " +
-                $"TargetObjectId={targetObjectId}, " +
-                $"ForceUse={forceUse}");
 
             byte[] packet =
                 BuildPacket(
@@ -392,7 +382,46 @@ public class GameServerConnection : MonoBehaviour
                 $"{ex.Message}");
         }
     }
+    public async void SendShortcutUpdateRequest(
+    int page,
+    int slot,
+    ShortcutType shortcutType,
+    int referenceId)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
 
+            string data =
+                string.Join(
+                    "|",
+                    page,
+                    slot,
+                    (int)shortcutType,
+                    referenceId);
+
+
+            byte[] packet =
+                BuildPacket(
+                    35,
+                    data);
+
+            await _client
+                .GetStream()
+                .WriteAsync(
+                    packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send shortcut update: " +
+                $"{ex.Message}");
+        }
+    }
     private byte[] BuildPacket(ushort packetType, string data)
     {
         byte[] dataBytes = Encoding.UTF8.GetBytes(data);

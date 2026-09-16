@@ -40,12 +40,6 @@ public class GroundItemManager : MonoBehaviour
             objectId,
             drop);
 
-        Debug.Log(
-            $"[GROUND ITEM] Spawned. " +
-            $"ObjectId={objectId}, " +
-            $"ItemId={itemId}, " +
-            $"Quantity={quantity}, " +
-            $"Position={position}");
     }
 
     public void Despawn(int objectId)
@@ -67,8 +61,5 @@ public class GroundItemManager : MonoBehaviour
         Destroy(
             drop.gameObject);
 
-        Debug.Log(
-            $"[GROUND ITEM] Despawned. " +
-            $"ObjectId={objectId}");
     }
 }

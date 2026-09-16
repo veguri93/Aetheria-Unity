@@ -104,6 +104,10 @@ public static class ClientPacketHandler
                 HandlePlayerManaChanged(packet);
                 break;
 
+            case 36:
+                HandleShortcutSnapshot(packet);
+                break;
+
             default:
                 Debug.LogWarning(
                     $"Unknown packet type: {packet.Type}");
@@ -837,9 +841,7 @@ public static class ClientPacketHandler
                 item);
         }
 
-        Debug.Log(
-            $"Inventory loaded: " +
-            $"{ClientInventory.Items.Count} items.");
+
 
         InventoryUI inventoryUI =
     Object.FindAnyObjectByType<InventoryUI>();
@@ -924,12 +926,7 @@ public static class ClientPacketHandler
             return;
         }
 
-        Debug.Log(
-            $"Character Progress: " +
-            $"Level={level}, " +
-            $"XP={experience}, " +
-            $"CurrentLevelXP={currentLevelExperience}, " +
-            $"NextLevelXP={nextLevelExperience}");
+
 
         PlayerProgressUI.Instance?.SetProgress(
     level,
@@ -1120,6 +1117,86 @@ public static class ClientPacketHandler
         statsUI?.SetMana(
             currentMp,
             maxMp);
+    }
+
+    private static void HandleShortcutSnapshot(
+        ClientPacket packet)
+    {
+        string data =
+            Encoding.UTF8.GetString(
+                packet.Data);
+
+        SkillShortcutBarUI shortcutBar =
+            Object.FindAnyObjectByType<SkillShortcutBarUI>();
+
+        if (shortcutBar == null)
+        {
+            Debug.LogWarning(
+                "[SHORTCUT] Shortcut bar was not found.");
+
+            return;
+        }
+
+        shortcutBar.ClearAllShortcuts();
+
+        if (string.IsNullOrWhiteSpace(data))
+            return;
+
+        string[] entries =
+            data.Split(
+                ';',
+                System.StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (string entry in entries)
+        {
+            string[] parts =
+                entry.Split(',');
+
+            if (parts.Length != 4)
+                continue;
+
+            if (!int.TryParse(
+                    parts[0],
+                    out int page) ||
+                !int.TryParse(
+                    parts[1],
+                    out int slot) ||
+                !int.TryParse(
+                    parts[2],
+                    out int typeValue) ||
+                !int.TryParse(
+                    parts[3],
+                    out int referenceId))
+            {
+                continue;
+            }
+
+            if (page != 0)
+                continue;
+
+            if (slot < 1 ||
+                slot > 12)
+            {
+                continue;
+            }
+
+            ShortcutType shortcutType =
+                (ShortcutType)typeValue;
+
+            if (shortcutType != ShortcutType.Skill &&
+                shortcutType != ShortcutType.Item)
+            {
+                continue;
+            }
+
+            if (referenceId <= 0)
+                continue;
+
+            shortcutBar.LoadShortcut(
+                slot,
+                shortcutType,
+                referenceId);
+        }
     }
 
 }

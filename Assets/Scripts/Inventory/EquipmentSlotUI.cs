@@ -105,8 +105,6 @@ public class EquipmentSlotUI :
         if (GameServerConnection.Instance == null)
             return;
 
-        Debug.Log(
-            $"Unequipping item: ObjectId={_objectId}, Slot={_slot}");
 
         GameServerConnection.Instance
             .SendUnequipItemRequest(_objectId);

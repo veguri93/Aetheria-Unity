@@ -159,10 +159,6 @@ public class InventorySlotUI :
         if (GameServerConnection.Instance == null)
             return;
 
-        Debug.Log(
-            $"Using inventory item: " +
-            $"ObjectId={item.ObjectId}, " +
-            $"ItemId={item.ItemId}");
 
         GameServerConnection.Instance
             .SendItemActionRequest(
