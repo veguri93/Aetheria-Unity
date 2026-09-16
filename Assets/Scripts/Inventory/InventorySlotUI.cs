@@ -11,7 +11,8 @@ public class InventorySlotUI :
     IEndDragHandler,
     IDropHandler,
     IPointerEnterHandler,
-IPointerExitHandler
+    IPointerExitHandler,
+    IShortcutDragSource
 {
     [SerializeField]
     private Image itemIcon;
@@ -24,22 +25,45 @@ IPointerExitHandler
     private GameObject dragIconObject;
     private Canvas rootCanvas;
     private InventoryUI inventoryUI;
-    public ClientItemInstance Item => item;
+
+    public ClientItemInstance Item =>
+        item;
 
     public int SlotIndex { get; private set; }
 
+    public ShortcutType ShortcutType =>
+        ShortcutType.Item;
+
+    public int ShortcutReferenceId =>
+        item != null
+            ? item.ItemId
+            : 0;
+
+    public Sprite ShortcutIcon =>
+        itemIcon != null
+            ? itemIcon.sprite
+            : null;
+
     private void Awake()
     {
-        rootCanvas = GetComponentInParent<Canvas>();
-        inventoryUI = GetComponentInParent<InventoryUI>();
+        rootCanvas =
+            GetComponentInParent<Canvas>();
+
+        inventoryUI =
+            GetComponentInParent<InventoryUI>();
+
         Clear();
     }
 
-    public void SetSlotIndex(int index)
+    public void SetSlotIndex(
+        int index)
     {
-        SlotIndex = index;
+        SlotIndex =
+            index;
     }
-    public void OnDrop(PointerEventData eventData)
+
+    public void OnDrop(
+        PointerEventData eventData)
     {
         InventorySlotUI sourceSlot =
             eventData.pointerDrag?
@@ -55,14 +79,19 @@ IPointerExitHandler
             sourceSlot.Item.ObjectId,
             SlotIndex);
     }
+
     public void SetItem(
         ClientItemInstance itemInstance,
         Sprite icon)
     {
-        item = itemInstance;
+        item =
+            itemInstance;
 
-        itemIcon.sprite = icon;
-        itemIcon.gameObject.SetActive(icon != null);
+        itemIcon.sprite =
+            icon;
+
+        itemIcon.gameObject.SetActive(
+            icon != null);
 
         quantityText.text =
             item.Quantity > 1
@@ -72,14 +101,21 @@ IPointerExitHandler
 
     public void Clear()
     {
-        item = null;
+        item =
+            null;
 
-        itemIcon.sprite = null;
-        itemIcon.gameObject.SetActive(false);
+        itemIcon.sprite =
+            null;
 
-        quantityText.text = string.Empty;
+        itemIcon.gameObject.SetActive(
+            false);
+
+        quantityText.text =
+            string.Empty;
     }
-    public void OnPointerEnter(PointerEventData eventData)
+
+    public void OnPointerEnter(
+        PointerEventData eventData)
     {
         if (item == null)
             return;
@@ -89,21 +125,25 @@ IPointerExitHandler
             transform as RectTransform);
     }
 
-    public void OnPointerExit(PointerEventData eventData)
+    public void OnPointerExit(
+        PointerEventData eventData)
     {
         ItemTooltipUI.Instance?.Hide();
     }
-    public void OnPointerClick(PointerEventData eventData)
+
+    public void OnPointerClick(
+        PointerEventData eventData)
     {
         if (item == null)
             return;
 
         if (eventData.button ==
-    PointerEventData.InputButton.Right)
+            PointerEventData.InputButton.Right)
         {
             InventoryItemContextMenu.Instance?.Show(
-    item,
-    transform as RectTransform);
+                item,
+                transform as RectTransform);
+
             return;
         }
 
@@ -120,13 +160,17 @@ IPointerExitHandler
             return;
 
         Debug.Log(
-            $"Using inventory item: ObjectId={item.ObjectId}, ItemId={item.ItemId}");
+            $"Using inventory item: " +
+            $"ObjectId={item.ObjectId}, " +
+            $"ItemId={item.ItemId}");
 
         GameServerConnection.Instance
-            .SendItemActionRequest(item.ObjectId);
+            .SendItemActionRequest(
+                item.ObjectId);
     }
 
-    public void OnBeginDrag(PointerEventData eventData)
+    public void OnBeginDrag(
+        PointerEventData eventData)
     {
         ItemTooltipUI.Instance?.Hide();
 
@@ -152,9 +196,14 @@ IPointerExitHandler
         Image dragImage =
             dragIconObject.GetComponent<Image>();
 
-        dragImage.sprite = itemIcon.sprite;
-        dragImage.preserveAspect = true;
-        dragImage.raycastTarget = false;
+        dragImage.sprite =
+            itemIcon.sprite;
+
+        dragImage.preserveAspect =
+            true;
+
+        dragImage.raycastTarget =
+            false;
 
         RectTransform dragRect =
             dragIconObject.GetComponent<RectTransform>();
@@ -166,7 +215,8 @@ IPointerExitHandler
             eventData.position;
     }
 
-    public void OnDrag(PointerEventData eventData)
+    public void OnDrag(
+        PointerEventData eventData)
     {
         if (dragIconObject == null)
             return;
@@ -175,13 +225,16 @@ IPointerExitHandler
             eventData.position;
     }
 
-    public void OnEndDrag(PointerEventData eventData)
+    public void OnEndDrag(
+        PointerEventData eventData)
     {
         if (dragIconObject == null)
             return;
 
-        Destroy(dragIconObject);
+        Destroy(
+            dragIconObject);
 
-        dragIconObject = null;
+        dragIconObject =
+            null;
     }
 }

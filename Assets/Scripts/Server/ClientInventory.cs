@@ -29,6 +29,28 @@ public static class ClientInventory
             out item);
     }
 
+    public static bool TryGetItemByItemId(
+        int itemId,
+        out ClientItemInstance item)
+    {
+        foreach (ClientItemInstance inventoryItem in
+                 _items.Values)
+        {
+            if (inventoryItem.ItemId != itemId)
+                continue;
+
+            item =
+                inventoryItem;
+
+            return true;
+        }
+
+        item =
+            null;
+
+        return false;
+    }
+
     public static bool Remove(
         int objectId)
     {

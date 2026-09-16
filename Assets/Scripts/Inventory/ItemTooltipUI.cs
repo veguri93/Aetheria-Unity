@@ -37,6 +37,30 @@ public class ItemTooltipUI : MonoBehaviour
         descriptionText.text =
             definition.Description;
 
+        ShowAt(
+            itemRect);
+    }
+
+    public void ShowSkill(
+        SkillClientData skill,
+        RectTransform skillRect)
+    {
+        itemNameText.text =
+            skill.DisplayName;
+
+        itemTypeText.text =
+            "Skill";
+
+        descriptionText.text =
+            skill.Description;
+
+        ShowAt(
+            skillRect);
+    }
+
+    private void ShowAt(
+        RectTransform sourceRect)
+    {
         tooltipRoot.SetActive(true);
 
         RectTransform tooltipRect =
@@ -45,13 +69,18 @@ public class ItemTooltipUI : MonoBehaviour
         Vector3[] corners =
             new Vector3[4];
 
-        itemRect.GetWorldCorners(corners);
+        sourceRect.GetWorldCorners(
+            corners);
 
         Vector3 bottomCenter =
             (corners[0] + corners[3]) / 2f;
 
         tooltipRect.position =
-            bottomCenter + new Vector3(0, -5f, 0);
+            bottomCenter +
+            new Vector3(
+                0,
+                -5f,
+                0);
     }
 
     public void Hide()
