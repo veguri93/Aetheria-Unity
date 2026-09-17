@@ -116,6 +116,10 @@ public static class ClientPacketHandler
                 HandleMonsterMove(packet);
                 break;
 
+            case 39:
+                HandleSkillToggleChanged(packet);
+                break;
+
             default:
                 Debug.LogWarning(
                     $"Unknown packet type: {packet.Type}");
@@ -1288,5 +1292,35 @@ public static class ClientPacketHandler
                 y,
                 z),
             rotation);
+    }
+    private static void HandleSkillToggleChanged(
+    ClientPacket packet)
+    {
+        string data =
+            Encoding.UTF8.GetString(
+                packet.Data);
+
+        string[] parts =
+            data.Split('|');
+
+        if (parts.Length != 2)
+            return;
+
+        if (!int.TryParse(
+                parts[0],
+                out int skillId) ||
+            !bool.TryParse(
+                parts[1],
+                out bool isActive))
+        {
+            return;
+        }
+
+        if (skillId <= 0)
+            return;
+
+        SkillToggleTracker.SetActive(
+            skillId,
+            isActive);
     }
 }

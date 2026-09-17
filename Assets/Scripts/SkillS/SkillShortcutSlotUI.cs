@@ -20,7 +20,8 @@ public class SkillShortcutSlotUI :
 
     [SerializeField]
     private TMP_Text keyText;
-
+    [SerializeField]
+    private Outline toggleActiveOutline;
     private int slotNumber;
 
     private ShortcutType shortcutType =
@@ -91,12 +92,19 @@ public class SkillShortcutSlotUI :
 
             cooldownOverlay.gameObject.SetActive(
                 false);
+
+        }
+        if (toggleActiveOutline != null)
+        {
+            toggleActiveOutline.enabled =
+                false;
         }
     }
 
     private void Update()
     {
         UpdateCooldownVisual();
+        UpdateToggleVisual();
     }
 
     private void UpdateCooldownVisual()
@@ -153,7 +161,20 @@ public class SkillShortcutSlotUI :
 
         ClearShortcut();
     }
+    private void UpdateToggleVisual()
+    {
+        if (toggleActiveOutline == null)
+            return;
 
+        bool active =
+            shortcutType == ShortcutType.Skill &&
+            referenceId > 0 &&
+            SkillToggleTracker.IsActive(
+                referenceId);
+
+        toggleActiveOutline.enabled =
+            active;
+    }
     public void SetSkill(
         SkillClientData skill)
     {
@@ -245,6 +266,11 @@ public class SkillShortcutSlotUI :
 
             cooldownOverlay.gameObject.SetActive(
                 false);
+        }
+        if (toggleActiveOutline != null)
+        {
+            toggleActiveOutline.enabled =
+                false;
         }
     }
 
