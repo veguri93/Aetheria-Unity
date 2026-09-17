@@ -19,22 +19,27 @@ public class MonsterAI : MonoBehaviour
     private bool _isWalking;
     private float _waitTimer;
     private bool _isAttacking;
-    [SerializeField] private float _attackRange = 1.5f;
 
+    [SerializeField]
+    private float _attackRange = 1.5f;
 
     private LocalPlayer _aggroTarget;
 
-
     private void Awake()
     {
-        _monster = GetComponent<Monster>();
-        _animator = GetComponent<Animator>();
+        _monster =
+            GetComponent<Monster>();
 
-        _spawnPosition = transform.position;
+        _animator =
+            GetComponent<Animator>();
 
-        _waitTimer = Random.Range(
-            _minWaitTime,
-            _maxWaitTime);
+        _spawnPosition =
+            transform.position;
+
+        _waitTimer =
+            Random.Range(
+                _minWaitTime,
+                _maxWaitTime);
 
         SetWalking(false);
     }
@@ -49,7 +54,8 @@ public class MonsterAI : MonoBehaviour
             PlayerHealth health =
                 _aggroTarget.GetComponent<PlayerHealth>();
 
-            if (health != null && health.IsDead)
+            if (health != null &&
+                health.IsDead)
             {
                 StopAggro();
                 return;
@@ -73,7 +79,9 @@ public class MonsterAI : MonoBehaviour
 
         Wait();
     }
-    private void SetRunning(bool running)
+
+    private void SetRunning(
+        bool running)
     {
         if (_animator == null)
             return;
@@ -92,9 +100,10 @@ public class MonsterAI : MonoBehaviour
         SetWalking(false);
         SetRunning(false);
 
-        _waitTimer = Random.Range(
-            _minWaitTime,
-            _maxWaitTime);
+        _waitTimer =
+            Random.Range(
+                _minWaitTime,
+                _maxWaitTime);
     }
 
     private void HandleAggro()
@@ -112,49 +121,13 @@ public class MonsterAI : MonoBehaviour
 
         StopMovement();
 
-        Vector3 direction =
-            _aggroTarget.transform.position -
-            transform.position;
-
-        direction.y = 0f;
-
-        if (direction.sqrMagnitude > 0.001f)
-        {
-            transform.rotation =
-                Quaternion.Slerp(
-                    transform.rotation,
-                    Quaternion.LookRotation(direction),
-                    _rotationSpeed * Time.deltaTime);
-        }
-
         Attack();
     }
+
     private void ChaseTarget()
     {
-        Vector3 direction =
-            _aggroTarget.transform.position -
-            transform.position;
-
-        direction.y = 0f;
-
-        if (direction.sqrMagnitude <= 0.01f)
-            return;
-
-        direction.Normalize();
-
-        transform.rotation =
-            Quaternion.Slerp(
-                transform.rotation,
-                Quaternion.LookRotation(direction),
-                _rotationSpeed * Time.deltaTime);
-
-        transform.position +=
-            direction *
-            _moveSpeed *
-            Time.deltaTime;
-
-        SetWalking(false);
-        SetRunning(true);
+        // Server controls movement and the network
+        // movement code controls the Run animation.
     }
 
     private void StopMovement()
@@ -163,6 +136,17 @@ public class MonsterAI : MonoBehaviour
 
         SetWalking(false);
         SetRunning(false);
+    }
+    public void SetServerRunning(
+    bool running)
+    {
+        if (running)
+        {
+            SetWalking(false);
+        }
+
+        SetRunning(
+            running);
     }
     private void Attack()
     {
@@ -174,28 +158,38 @@ public class MonsterAI : MonoBehaviour
         SetWalking(false);
         SetRunning(false);
 
-        transform.rotation =
-            Quaternion.LookRotation(
+        if (_aggroTarget != null)
+        {
+            Vector3 direction =
                 _aggroTarget.transform.position -
-                transform.position);
+                transform.position;
+
+            direction.y = 0f;
+
+            if (direction.sqrMagnitude > 0.001f)
+            {
+                transform.rotation =
+                    Quaternion.LookRotation(
+                        direction);
+            }
+        }
 
         if (_animator != null)
         {
-            _animator.SetTrigger("Attack");
+            _animator.SetTrigger(
+                "Attack");
         }
-
     }
 
     public void OnAttackFinished()
     {
         _isAttacking = false;
-
-
     }
 
     private void Wait()
     {
-        _waitTimer -= Time.deltaTime;
+        _waitTimer -=
+            Time.deltaTime;
 
         if (_waitTimer > 0f)
             return;
@@ -219,8 +213,6 @@ public class MonsterAI : MonoBehaviour
         _isWalking = true;
 
         SetWalking(true);
-
-
     }
 
     private void WalkToTarget()
@@ -245,16 +237,20 @@ public class MonsterAI : MonoBehaviour
         transform.rotation =
             Quaternion.Slerp(
                 transform.rotation,
-                Quaternion.LookRotation(direction),
-                _rotationSpeed * Time.deltaTime);
+                Quaternion.LookRotation(
+                    direction),
+                _rotationSpeed *
+                Time.deltaTime);
 
         float movement =
             Mathf.Min(
-                _moveSpeed * Time.deltaTime,
+                _moveSpeed *
+                Time.deltaTime,
                 distance);
 
         transform.position +=
-            direction * movement;
+            direction *
+            movement;
     }
 
     private void StopWalking()
@@ -263,12 +259,14 @@ public class MonsterAI : MonoBehaviour
 
         SetWalking(false);
 
-        _waitTimer = Random.Range(
-            _minWaitTime,
-            _maxWaitTime);
-
+        _waitTimer =
+            Random.Range(
+                _minWaitTime,
+                _maxWaitTime);
     }
-    public void SetAggro(LocalPlayer player)
+
+    public void SetAggro(
+        LocalPlayer player)
     {
         if (_monster.IsDead)
             return;
@@ -276,23 +274,21 @@ public class MonsterAI : MonoBehaviour
         if (player == null)
             return;
 
-        _aggroTarget = player;
+        _aggroTarget =
+            player;
     }
-    private void SetWalking(bool walking)
+
+    private void SetWalking(
+        bool walking)
     {
-
         if (_animator == null)
-        {
-
             return;
-        }
 
         _animator.SetBool(
             "Walk",
             walking);
-
-
     }
+
     public void ResetAfterRespawn()
     {
         _aggroTarget = null;
@@ -302,8 +298,9 @@ public class MonsterAI : MonoBehaviour
         SetWalking(false);
         SetRunning(false);
 
-        _waitTimer = Random.Range(
-            _minWaitTime,
-            _maxWaitTime);
+        _waitTimer =
+            Random.Range(
+                _minWaitTime,
+                _maxWaitTime);
     }
 }

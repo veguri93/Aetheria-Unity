@@ -103,7 +103,26 @@ public class EquipmentUI : MonoBehaviour
 
         slotUI.SetItem(
             objectId,
+            itemId,
             definition.Icon);
+    }
+    public void ShowItemTooltip(
+    int itemId,
+    RectTransform itemRect)
+    {
+        if (_itemVisualDatabase == null)
+            return;
+
+        if (!_itemVisualDatabase.TryGet(
+                itemId,
+                out ItemVisualDefinition definition))
+        {
+            return;
+        }
+
+        ItemTooltipUI.Instance?.Show(
+            definition,
+            itemRect);
     }
 
     public void UnequipItem(EquipmentSlot slot)
@@ -117,4 +136,5 @@ public class EquipmentUI : MonoBehaviour
 
         slotUI.Clear();
     }
+
 }

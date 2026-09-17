@@ -14,6 +14,9 @@ public class SkillEntryUI :
     [SerializeField]
     private Image icon;
 
+    [SerializeField]
+    private Image cooldownOverlay;
+
     private int skillId;
 
     private SkillClientData skill;
@@ -45,6 +48,74 @@ public class SkillEntryUI :
     {
         rootCanvas =
             GetComponentInParent<Canvas>();
+
+        if (cooldownOverlay != null)
+        {
+            cooldownOverlay.type =
+                Image.Type.Filled;
+
+            cooldownOverlay.fillMethod =
+                Image.FillMethod.Radial360;
+
+            cooldownOverlay.fillOrigin =
+                (int)Image.Origin360.Top;
+
+            cooldownOverlay.fillClockwise =
+                true;
+
+            cooldownOverlay.fillAmount =
+                0f;
+
+            cooldownOverlay.raycastTarget =
+                false;
+
+            cooldownOverlay.gameObject.SetActive(
+                false);
+        }
+    }
+
+    private void Update()
+    {
+        UpdateCooldownVisual();
+    }
+
+    private void UpdateCooldownVisual()
+    {
+        if (cooldownOverlay == null)
+            return;
+
+        if (!HasSkill)
+        {
+            cooldownOverlay.fillAmount =
+                0f;
+
+            cooldownOverlay.gameObject.SetActive(
+                false);
+
+            return;
+        }
+
+        float remaining =
+            SkillReuseTracker
+                .GetNormalizedRemaining(
+                    skillId);
+
+        if (remaining <= 0f)
+        {
+            cooldownOverlay.fillAmount =
+                0f;
+
+            cooldownOverlay.gameObject.SetActive(
+                false);
+
+            return;
+        }
+
+        cooldownOverlay.gameObject.SetActive(
+            true);
+
+        cooldownOverlay.fillAmount =
+            remaining;
     }
 
     public void SetSkill(
@@ -58,10 +129,26 @@ public class SkillEntryUI :
 
         if (icon != null)
         {
-            icon.gameObject.SetActive(true);
+            icon.gameObject.SetActive(
+                true);
 
             icon.sprite =
                 skillData.Icon;
+        }
+
+        if (cooldownOverlay != null)
+        {
+            cooldownOverlay.sprite =
+                skillData.Icon;
+
+            cooldownOverlay.preserveAspect =
+                true;
+
+            cooldownOverlay.fillAmount =
+                0f;
+
+            cooldownOverlay.gameObject.SetActive(
+                false);
         }
     }
 
@@ -78,7 +165,20 @@ public class SkillEntryUI :
             icon.sprite =
                 null;
 
-            icon.gameObject.SetActive(false);
+            icon.gameObject.SetActive(
+                false);
+        }
+
+        if (cooldownOverlay != null)
+        {
+            cooldownOverlay.sprite =
+                null;
+
+            cooldownOverlay.fillAmount =
+                0f;
+
+            cooldownOverlay.gameObject.SetActive(
+                false);
         }
     }
 

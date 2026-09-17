@@ -206,23 +206,41 @@ public class GameServerConnection : MonoBehaviour
         }
     }
     public async void SendItemActionRequest(
-    int objectId)
+        int objectId,
+        EquipmentSlot targetSlot = EquipmentSlot.None)
     {
         try
         {
             if (_client == null || !_client.Connected)
                 return;
 
-            string data =
-                objectId.ToString();
+            string data;
+
+            if (targetSlot == EquipmentSlot.None)
+            {
+                // Normal double-click / shortcut use.
+                data =
+                    objectId.ToString();
+            }
+            else
+            {
+                // Dragged directly onto an equipment slot.
+                data =
+                    string.Join(
+                        "|",
+                        objectId,
+                        targetSlot);
+            }
 
             byte[] packet =
                 BuildPacket(
                     21,
                     data);
 
-            await _client.GetStream().WriteAsync(
-                packet);
+            await _client
+                .GetStream()
+                .WriteAsync(
+                    packet);
         }
         catch (System.Exception ex)
         {
@@ -349,11 +367,26 @@ public class GameServerConnection : MonoBehaviour
             }
 
             if (skillId <= 0 ||
-                targetObjectId <= 0 ||
                 string.IsNullOrWhiteSpace(
                     targetEntityType))
             {
                 return;
+            }
+
+            bool isSelf =
+                targetEntityType.Equals(
+                    "Self",
+                    System.StringComparison.OrdinalIgnoreCase);
+
+            if (isSelf)
+            {
+                if (targetObjectId != 0)
+                    return;
+            }
+            else
+            {
+                if (targetObjectId <= 0)
+                    return;
             }
 
             string data =

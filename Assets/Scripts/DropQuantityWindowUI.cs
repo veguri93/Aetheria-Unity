@@ -33,11 +33,6 @@ public class DropQuantityWindowUI : MonoBehaviour
 
         quantityInput.text = "1";
 
-        Debug.Log(
-            $"[DROP QUANTITY] Window opened. " +
-            $"ObjectId={item.ObjectId}, " +
-            $"ItemId={item.ItemId}, " +
-            $"AvailableQuantity={item.Quantity}");
 
         gameObject.SetActive(true);
 

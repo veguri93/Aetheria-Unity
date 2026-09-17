@@ -16,6 +16,9 @@ public class SkillShortcutSlotUI :
     private Image icon;
 
     [SerializeField]
+    private Image cooldownOverlay;
+
+    [SerializeField]
     private TMP_Text keyText;
 
     private int slotNumber;
@@ -65,6 +68,75 @@ public class SkillShortcutSlotUI :
 
         rootCanvas =
             GetComponentInParent<Canvas>();
+
+        if (cooldownOverlay != null)
+        {
+            cooldownOverlay.type =
+                Image.Type.Filled;
+
+            cooldownOverlay.fillMethod =
+                Image.FillMethod.Radial360;
+
+            cooldownOverlay.fillOrigin =
+                (int)Image.Origin360.Top;
+
+            cooldownOverlay.fillClockwise =
+                true;
+
+            cooldownOverlay.fillAmount =
+                0f;
+
+            cooldownOverlay.raycastTarget =
+                false;
+
+            cooldownOverlay.gameObject.SetActive(
+                false);
+        }
+    }
+
+    private void Update()
+    {
+        UpdateCooldownVisual();
+    }
+
+    private void UpdateCooldownVisual()
+    {
+        if (cooldownOverlay == null)
+            return;
+
+        if (shortcutType != ShortcutType.Skill ||
+            referenceId <= 0)
+        {
+            cooldownOverlay.fillAmount =
+                0f;
+
+            cooldownOverlay.gameObject.SetActive(
+                false);
+
+            return;
+        }
+
+        float remaining =
+            SkillReuseTracker
+                .GetNormalizedRemaining(
+                    referenceId);
+
+        if (remaining <= 0f)
+        {
+            cooldownOverlay.fillAmount =
+                0f;
+
+            cooldownOverlay.gameObject.SetActive(
+                false);
+
+            return;
+        }
+
+        cooldownOverlay.gameObject.SetActive(
+            true);
+
+        cooldownOverlay.fillAmount =
+            remaining;
     }
 
     public void Initialize(
@@ -121,6 +193,29 @@ public class SkillShortcutSlotUI :
 
         SetIcon(
             sprite);
+
+        if (cooldownOverlay != null)
+        {
+            if (type == ShortcutType.Skill)
+            {
+                cooldownOverlay.sprite =
+                    sprite;
+
+                cooldownOverlay.preserveAspect =
+                    true;
+            }
+            else
+            {
+                cooldownOverlay.sprite =
+                    null;
+
+                cooldownOverlay.fillAmount =
+                    0f;
+
+                cooldownOverlay.gameObject.SetActive(
+                    false);
+            }
+        }
     }
 
     public void ClearShortcut()
@@ -137,6 +232,18 @@ public class SkillShortcutSlotUI :
                 null;
 
             icon.gameObject.SetActive(
+                false);
+        }
+
+        if (cooldownOverlay != null)
+        {
+            cooldownOverlay.sprite =
+                null;
+
+            cooldownOverlay.fillAmount =
+                0f;
+
+            cooldownOverlay.gameObject.SetActive(
                 false);
         }
     }
@@ -171,7 +278,6 @@ public class SkillShortcutSlotUI :
             dragSource.ShortcutIcon);
 
         SaveShortcutState();
-
     }
 
     private void HandleShortcutSlotDrop(
@@ -226,8 +332,6 @@ public class SkillShortcutSlotUI :
 
         SaveShortcutState();
         sourceSlot.SaveShortcutState();
-
-
     }
 
     public void OnPointerClick(
@@ -328,7 +432,6 @@ public class SkillShortcutSlotUI :
 
         if (dragDropHandled)
             return;
-
 
         ClearShortcut();
 

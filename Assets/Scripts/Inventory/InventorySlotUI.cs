@@ -65,8 +65,30 @@ public class InventorySlotUI :
     public void OnDrop(
         PointerEventData eventData)
     {
+        if (eventData.pointerDrag == null)
+            return;
+
+        // Equipped item dropped into Inventory.
+        EquipmentSlotUI equipmentSlot =
+            eventData.pointerDrag
+                .GetComponent<EquipmentSlotUI>();
+
+        if (equipmentSlot != null &&
+            equipmentSlot.HasItem)
+        {
+            if (GameServerConnection.Instance == null)
+                return;
+
+            GameServerConnection.Instance
+                .SendUnequipItemRequest(
+                    equipmentSlot.ObjectId);
+
+            return;
+        }
+
+        // Normal Inventory item reordering.
         InventorySlotUI sourceSlot =
-            eventData.pointerDrag?
+            eventData.pointerDrag
                 .GetComponent<InventorySlotUI>();
 
         if (sourceSlot == null)
@@ -158,7 +180,6 @@ public class InventorySlotUI :
 
         if (GameServerConnection.Instance == null)
             return;
-
 
         GameServerConnection.Instance
             .SendItemActionRequest(

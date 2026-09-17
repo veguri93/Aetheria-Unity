@@ -33118,6 +33118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 201408431e9482946934679d74a64daf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInteraction
+  skillDatabase: {fileID: 11400000, guid: 960e6e95f202add45b87816ba588c406, type: 2}
 --- !u!114 &4762781199044396636
 MonoBehaviour:
   m_ObjectHideFlags: 0

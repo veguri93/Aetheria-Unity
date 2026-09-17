@@ -8,6 +8,8 @@ public class PlayerInteraction : MonoBehaviour
     private PlayerCombat _combat;
 
     private SkillShortcutBarUI _shortcutBar;
+    [SerializeField]
+    private SkillDatabase skillDatabase;
 
     private WorldItemDrop pendingPickup;
 
@@ -109,34 +111,80 @@ public class PlayerInteraction : MonoBehaviour
         int slotNumber,
         int skillId)
     {
-        if (TargetManager.Instance == null)
-            return;
-
-        Monster target =
-            TargetManager.Instance.CurrentTarget;
-
-        if (target == null)
+        if (skillDatabase == null)
         {
             Debug.LogWarning(
-                $"[SHORTCUT] F{slotNumber} skill failed: " +
-                $"no monster targeted.");
+                "[SKILL] SkillDatabase is not assigned.");
 
             return;
         }
 
-
-
-        GameServerConnection.Instance?
-            .SendSkillUseRequest(
+        if (!skillDatabase.TryGetSkill(
                 skillId,
-                "Monster",
-                target.ObjectId,
-                false);
+                out SkillClientData skill))
+        {
+            Debug.LogWarning(
+                $"[SHORTCUT] F{slotNumber} skill failed: " +
+                $"SkillId={skillId} was not found.");
+
+            return;
+        }
+
+        switch (skill.TargetType)
+        {
+            case SkillClientTargetType.SELF:
+                {
+                    GameServerConnection.Instance?
+                        .SendSkillUseRequest(
+                            skillId,
+                            "Self",
+                            0,
+                            false);
+
+                    break;
+                }
+
+            case SkillClientTargetType.ONE:
+                {
+                    if (TargetManager.Instance == null)
+                        return;
+
+                    Monster target =
+                        TargetManager.Instance.CurrentTarget;
+
+                    if (target == null)
+                    {
+                        Debug.LogWarning(
+                            $"[SHORTCUT] F{slotNumber} skill failed: " +
+                            $"no monster targeted.");
+
+                        return;
+                    }
+
+                    GameServerConnection.Instance?
+                        .SendSkillUseRequest(
+                            skillId,
+                            "Monster",
+                            target.ObjectId,
+                            false);
+
+                    break;
+                }
+
+            default:
+                {
+                    Debug.LogWarning(
+                        $"[SHORTCUT] F{slotNumber} target type " +
+                        $"{skill.TargetType} is not implemented yet.");
+
+                    break;
+                }
+        }
     }
 
     private void ActivateItemShortcut(
-        int slotNumber,
-        int itemId)
+      int slotNumber,
+      int itemId)
     {
         if (!ClientInventory.TryGetItemByItemId(
                 itemId,
@@ -149,6 +197,14 @@ public class PlayerInteraction : MonoBehaviour
             return;
         }
 
+        if (item.IsEquipped)
+        {
+            GameServerConnection.Instance?
+                .SendUnequipItemRequest(
+                    item.ObjectId);
+
+            return;
+        }
 
         GameServerConnection.Instance?
             .SendItemActionRequest(
@@ -216,9 +272,6 @@ public class PlayerInteraction : MonoBehaviour
             return;
         }
 
-        Debug.Log(
-            "[PICKUP] Item is too far. " +
-            "Moving toward it.");
 
         _combat.StopAttack();
 

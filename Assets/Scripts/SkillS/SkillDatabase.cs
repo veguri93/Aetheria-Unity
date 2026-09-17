@@ -43,6 +43,9 @@ public class SkillClientData
     [SerializeField]
     private Sprite icon;
 
+    [SerializeField]
+    private SkillClientTargetType targetType;
+
     public int SkillId =>
         skillId;
 
@@ -54,4 +57,7 @@ public class SkillClientData
 
     public Sprite Icon =>
         icon;
+
+    public SkillClientTargetType TargetType =>
+        targetType;
 }

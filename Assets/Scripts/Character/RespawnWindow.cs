@@ -23,7 +23,7 @@ public class RespawnWindow : MonoBehaviour
     }
     public void RespawnVillage()
     {
-        Debug.Log("RESPAWN VILLAGE BUTTON CLICKED");
+      
 
         GameServerConnection connection =
             GameServerConnection.Instance;

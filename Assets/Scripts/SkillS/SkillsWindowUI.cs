@@ -17,7 +17,9 @@ public class SkillsWindowUI : MonoBehaviour
     private readonly List<int> ownedSkillIds =
         new()
         {
-            10001
+            10001,
+            10002,
+            10003
         };
 
     private void Start()
