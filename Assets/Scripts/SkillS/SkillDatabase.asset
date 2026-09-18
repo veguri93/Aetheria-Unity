@@ -18,13 +18,16 @@ MonoBehaviour:
     description: First Heal
     icon: {fileID: 21300000, guid: ecd29b5e2971ac34ca12af5694241759, type: 3}
     targetType: 1
+    operateType: 2
   - skillId: 10002
     displayName: Fireball
     description: First Attack Skill
     icon: {fileID: 21300000, guid: fa9a3960461fbbe46b59348a1a9bef31, type: 3}
     targetType: 1
+    operateType: 2
   - skillId: 10003
     displayName: Toggle power
     description: First toggle
     icon: {fileID: 21300000, guid: 996719ba7783ca44dbab5ed80cd5f0e7, type: 3}
     targetType: 0
+    operateType: 2

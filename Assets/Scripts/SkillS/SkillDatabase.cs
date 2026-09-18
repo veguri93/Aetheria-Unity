@@ -45,7 +45,11 @@ public class SkillClientData
 
     [SerializeField]
     private SkillClientTargetType targetType;
+    [SerializeField]
+    private SkillClientOperateType operateType;
 
+    public SkillClientOperateType OperateType =>
+        operateType;
     public int SkillId =>
         skillId;
 

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
@@ -118,6 +119,10 @@ public static class ClientPacketHandler
 
             case 39:
                 HandleSkillToggleChanged(packet);
+                break;
+
+            case 40:
+                HandleSkillSnapshot(packet);
                 break;
 
             default:
@@ -1322,5 +1327,47 @@ public static class ClientPacketHandler
         SkillToggleTracker.SetActive(
             skillId,
             isActive);
+    }
+
+    private static void HandleSkillSnapshot(
+    ClientPacket packet)
+    {
+        string data =
+            Encoding.UTF8.GetString(
+                packet.Data);
+
+        List<int> skillIds =
+            new();
+
+        if (!string.IsNullOrWhiteSpace(
+                data))
+        {
+            string[] parts =
+                data.Split(
+                    '|',
+                    System.StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (string part in parts)
+            {
+                if (!int.TryParse(
+                        part,
+                        out int skillId))
+                {
+                    continue;
+                }
+
+                if (skillId <= 0)
+                    continue;
+
+                skillIds.Add(
+                    skillId);
+            }
+        }
+
+        ClientSkillBook.SetSkills(
+            skillIds);
+
+        Debug.Log(
+            $"Skills loaded: {skillIds.Count}");
     }
 }

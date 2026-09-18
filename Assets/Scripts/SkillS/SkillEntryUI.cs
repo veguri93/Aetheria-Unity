@@ -6,6 +6,7 @@ public class SkillEntryUI :
     MonoBehaviour,
     IPointerEnterHandler,
     IPointerExitHandler,
+    IPointerClickHandler,
     IBeginDragHandler,
     IDragHandler,
     IEndDragHandler,
@@ -16,13 +17,16 @@ public class SkillEntryUI :
 
     [SerializeField]
     private Image cooldownOverlay;
-
+    [SerializeField]
+    private Outline toggleActiveOutline;
     private int skillId;
 
     private SkillClientData skill;
 
     private GameObject dragIconObject;
     private Canvas rootCanvas;
+
+    private PlayerInteraction playerInteraction;
 
     public int SkillId =>
         skillId;
@@ -44,10 +48,18 @@ public class SkillEntryUI :
             ? icon.sprite
             : null;
 
+    private bool IsPassive =>
+        skill != null &&
+        skill.OperateType ==
+        SkillClientOperateType.P;
+
     private void Awake()
     {
         rootCanvas =
             GetComponentInParent<Canvas>();
+
+        playerInteraction =
+            FindAnyObjectByType<PlayerInteraction>();
 
         if (cooldownOverlay != null)
         {
@@ -77,14 +89,28 @@ public class SkillEntryUI :
     private void Update()
     {
         UpdateCooldownVisual();
+        UpdateToggleVisual();
     }
+    private void UpdateToggleVisual()
+    {
+        if (toggleActiveOutline == null)
+            return;
 
+        bool active =
+            HasSkill &&
+            SkillToggleTracker.IsActive(
+                skillId);
+
+        toggleActiveOutline.enabled =
+            active;
+    }
     private void UpdateCooldownVisual()
     {
         if (cooldownOverlay == null)
             return;
 
-        if (!HasSkill)
+        if (!HasSkill ||
+            IsPassive)
         {
             cooldownOverlay.fillAmount =
                 0f;
@@ -180,16 +206,47 @@ public class SkillEntryUI :
             cooldownOverlay.gameObject.SetActive(
                 false);
         }
+        if (toggleActiveOutline != null)
+        {
+            toggleActiveOutline.enabled =
+                false;
+        }
+    }
+
+    public void OnPointerClick(
+        PointerEventData eventData)
+    {
+        if (eventData.button !=
+            PointerEventData.InputButton.Left)
+        {
+            return;
+        }
+
+        if (!HasSkill ||
+            IsPassive)
+        {
+            return;
+        }
+
+        if (playerInteraction == null)
+        {
+            playerInteraction =
+                FindAnyObjectByType<PlayerInteraction>();
+        }
+
+        playerInteraction?
+            .ActivateSkillFromWindow(
+                skillId);
     }
 
     public void OnPointerEnter(
         PointerEventData eventData)
     {
-        if (!HasSkill)
+        if (!HasSkill ||
+            skill == null)
+        {
             return;
-
-        if (skill == null)
-            return;
+        }
 
         ItemTooltipUI.Instance?.ShowSkill(
             skill,
@@ -207,11 +264,12 @@ public class SkillEntryUI :
     {
         ItemTooltipUI.Instance?.Hide();
 
-        if (!HasSkill)
+        if (!HasSkill ||
+            skill == null ||
+            IsPassive)
+        {
             return;
-
-        if (skill == null)
-            return;
+        }
 
         if (rootCanvas == null)
             return;

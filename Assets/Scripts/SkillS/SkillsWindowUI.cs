@@ -7,45 +7,57 @@ public class SkillsWindowUI : MonoBehaviour
     private SkillDatabase skillDatabase;
 
     [SerializeField]
-    private Transform content;
+    private Transform activeContent;
+
+    [SerializeField]
+    private Transform passiveContent;
 
     [SerializeField]
     private SkillEntryUI skillEntryPrefab;
 
-    private const int SlotCount = 50;
+    [SerializeField]
+    private Transform activeScrollView;
 
-    private readonly List<int> ownedSkillIds =
-        new()
-        {
-            10001,
-            10002,
-            10003
-        };
+    [SerializeField]
+    private Transform passiveScrollView;
+
+    private const int ActiveSlotCount = 50;
+    private const int PassiveSlotCount = 50;
+
+    private void OnEnable()
+    {
+        ClientSkillBook.Changed +=
+            PopulateSkills;
+    }
+
+    private void OnDisable()
+    {
+        ClientSkillBook.Changed -=
+            PopulateSkills;
+    }
 
     private void Start()
     {
         PopulateSkills();
+        ShowActiveSkills();
     }
 
     private void PopulateSkills()
     {
-        for (int i = 0;
-             i < SlotCount;
-             i++)
+        List<SkillClientData> activeSkills =
+            new();
+
+        List<SkillClientData> passiveSkills =
+            new();
+
+        List<int> ownedSkillIds =
+            new(
+                ClientSkillBook.GetOwnedSkillIds());
+
+        ownedSkillIds.Sort();
+
+        foreach (int skillId in ownedSkillIds)
         {
-            SkillEntryUI entry =
-                Instantiate(
-                    skillEntryPrefab,
-                    content);
-
-            entry.ClearSkill();
-
-            if (i >= ownedSkillIds.Count)
-                continue;
-
-            int skillId =
-                ownedSkillIds[i];
-
             if (!skillDatabase.TryGetSkill(
                     skillId,
                     out SkillClientData skill))
@@ -56,8 +68,80 @@ public class SkillsWindowUI : MonoBehaviour
                 continue;
             }
 
+            if (skill.OperateType ==
+                SkillClientOperateType.P)
+            {
+                passiveSkills.Add(
+                    skill);
+            }
+            else
+            {
+                activeSkills.Add(
+                    skill);
+            }
+        }
+
+        PopulateTable(
+            activeContent,
+            activeSkills,
+            ActiveSlotCount);
+
+        PopulateTable(
+            passiveContent,
+            passiveSkills,
+            PassiveSlotCount);
+    }
+
+    public void ShowActiveSkills()
+    {
+        activeScrollView.gameObject.SetActive(
+            true);
+
+        passiveScrollView.gameObject.SetActive(
+            false);
+    }
+
+    public void ShowPassiveSkills()
+    {
+        activeScrollView.gameObject.SetActive(
+            false);
+
+        passiveScrollView.gameObject.SetActive(
+            true);
+    }
+
+    private void PopulateTable(
+        Transform targetContent,
+        List<SkillClientData> skills,
+        int slotCount)
+    {
+        if (targetContent == null)
+            return;
+
+        for (int i = targetContent.childCount - 1;
+             i >= 0;
+             i--)
+        {
+            Destroy(
+                targetContent.GetChild(i).gameObject);
+        }
+
+        for (int i = 0;
+             i < slotCount;
+             i++)
+        {
+            SkillEntryUI entry =
+                Instantiate(
+                    skillEntryPrefab,
+                    targetContent);
+
+            entry.ClearSkill();
+
+            if (i >= skills.Count)
+                continue;
+
             entry.SetSkill(
-                skill);
+                skills[i]);
         }
     }
 }

@@ -181,7 +181,13 @@ public class PlayerInteraction : MonoBehaviour
                 }
         }
     }
-
+    public void ActivateSkillFromWindow(
+    int skillId)
+    {
+        ActivateSkillShortcut(
+            0,
+            skillId);
+    }
     private void ActivateItemShortcut(
       int slotNumber,
       int itemId)
