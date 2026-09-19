@@ -31,3 +31,15 @@ MonoBehaviour:
     icon: {fileID: 21300000, guid: 996719ba7783ca44dbab5ed80cd5f0e7, type: 3}
     targetType: 0
     operateType: 2
+  - skillId: 10000
+    displayName: passive
+    description: First passive
+    icon: {fileID: 21300000, guid: 055d849fb0111bd4a9e6b25465d6a631, type: 3}
+    targetType: 0
+    operateType: 0
+  - skillId: 10004
+    displayName: passive health
+    description: First passive2
+    icon: {fileID: 21300000, guid: 32962760381753c4697eb4b4f13f0062, type: 3}
+    targetType: 0
+    operateType: 0

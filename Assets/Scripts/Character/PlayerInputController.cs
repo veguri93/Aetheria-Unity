@@ -81,6 +81,17 @@ public class PlayerInputController : MonoBehaviour
             return;
         }
 
+        Npc npc =
+            hit.collider.GetComponentInParent<Npc>();
+
+        if (npc != null)
+        {
+            _player.Interaction.OnNpcClicked(
+                npc);
+
+            return;
+        }
+
         WorldItemDrop worldItem =
             hit.collider.GetComponentInParent<WorldItemDrop>();
 

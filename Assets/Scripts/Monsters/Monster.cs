@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Monster : MonoBehaviour
+public class Monster : MonoBehaviour, ITargetable
 {
     [SerializeField] private GameObject _selectionCircle;
     [SerializeField] private HealthBar _healthBar;
@@ -87,18 +87,16 @@ public class Monster : MonoBehaviour
                 -_rotationSmoothing *
                 Time.deltaTime);
 
-        transform.position =
-            Vector3.Lerp(
+        
+        transform.SetPositionAndRotation(
+Vector3.Lerp(
                 transform.position,
                 _serverTargetPosition,
-                positionT);
-
-        transform.rotation =
-            Quaternion.Slerp(
+                positionT),
+Quaternion.Slerp(
                 transform.rotation,
                 _serverTargetRotation,
-                rotationT);
-
+                rotationT));
         float remainingDistance =
             Vector3.Distance(
                 transform.position,
@@ -106,12 +104,10 @@ public class Monster : MonoBehaviour
 
         if (remainingDistance <= 0.02f)
         {
-            transform.position =
-                _serverTargetPosition;
-
-            transform.rotation =
-                _serverTargetRotation;
-
+            
+            transform.SetPositionAndRotation(
+_serverTargetPosition,
+_serverTargetRotation);
             _hasServerMovementTarget =
                 false;
 
@@ -271,15 +267,13 @@ public class Monster : MonoBehaviour
         gameObject.SetActive(
             true);
 
-        transform.position =
-            position;
-
-        transform.rotation =
-            Quaternion.Euler(
+        
+        transform.SetPositionAndRotation(
+position,
+Quaternion.Euler(
                 0f,
                 rotation,
-                0f);
-
+                0f));
         _serverTargetPosition =
             position;
 
@@ -320,7 +314,10 @@ public class Monster : MonoBehaviour
         _hasServerMovementTarget =
             false;
 
-        if (TargetManager.Instance?.CurrentTarget == this)
+        if (TargetManager.Instance != null &&
+            ReferenceEquals(
+                TargetManager.Instance.CurrentTarget,
+                this))
         {
             TargetManager.Instance.ClearTarget();
         }

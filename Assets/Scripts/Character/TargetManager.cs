@@ -4,11 +4,12 @@ public class TargetManager : MonoBehaviour
 {
     public static TargetManager Instance { get; private set; }
 
-    public Monster CurrentTarget { get; private set; }
+    public ITargetable CurrentTarget { get; private set; }
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (Instance != null &&
+            Instance != this)
         {
             Destroy(gameObject);
             return;
@@ -17,28 +18,38 @@ public class TargetManager : MonoBehaviour
         Instance = this;
     }
 
-    public void SetTarget(Monster monster)
+    public void SetTarget(
+        ITargetable target)
     {
-        if (CurrentTarget == monster)
+        if (ReferenceEquals(
+               CurrentTarget,
+               target))
+        {
             return;
+        }
 
         if (CurrentTarget != null)
+        {
             CurrentTarget.Deselect();
+        }
 
-        CurrentTarget = monster;
+        CurrentTarget =
+            target;
 
         if (CurrentTarget != null)
+        {
             CurrentTarget.Select();
-
-      
+        }
     }
 
     public void ClearTarget()
     {
         if (CurrentTarget != null)
+        {
             CurrentTarget.Deselect();
+        }
 
-        CurrentTarget = null;
-
+        CurrentTarget =
+            null;
     }
 }

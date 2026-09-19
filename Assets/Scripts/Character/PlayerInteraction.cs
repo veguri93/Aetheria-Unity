@@ -149,10 +149,10 @@ public class PlayerInteraction : MonoBehaviour
                     if (TargetManager.Instance == null)
                         return;
 
-                    Monster target =
+                    ITargetable currentTarget =
                         TargetManager.Instance.CurrentTarget;
 
-                    if (target == null)
+                    if (currentTarget is not Monster target)
                     {
                         Debug.LogWarning(
                             $"[SHORTCUT] F{slotNumber} skill failed: " +
@@ -241,8 +241,12 @@ public class PlayerInteraction : MonoBehaviour
     {
         pendingPickup = null;
 
-        if (TargetManager.Instance.CurrentTarget !=
-            monster)
+        if (TargetManager.Instance == null)
+            return;
+
+        if (!ReferenceEquals(
+                TargetManager.Instance.CurrentTarget,
+                monster))
         {
             TargetManager.Instance.SetTarget(
                 monster);
@@ -306,5 +310,34 @@ public class PlayerInteraction : MonoBehaviour
         GameServerConnection.Instance?
             .SendPickupItemRequest(
                 objectId);
+    }
+    public void OnNpcClicked(
+    Npc npc)
+    {
+        if (npc == null)
+            return;
+
+        pendingPickup =
+            null;
+
+        _combat.StopAttack();
+
+        if (TargetManager.Instance == null)
+            return;
+
+        if (!ReferenceEquals(
+                TargetManager.Instance.CurrentTarget,
+                npc))
+        {
+            TargetManager.Instance.SetTarget(
+                npc);
+
+            return;
+        }
+
+        Debug.Log(
+            $"Interacted with NPC: {npc.Name} " +
+            $"Type={npc.Type} " +
+            $"ObjectId={npc.ObjectId}");
     }
 }
