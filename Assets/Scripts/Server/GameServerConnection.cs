@@ -1036,6 +1036,42 @@ public class GameServerConnection : MonoBehaviour
                 $"{ex.Message}");
         }
     }
+    public async void SendPartyInviteRequest(
+    int targetPlayerId,
+    int lootMode)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (targetPlayerId <= 0)
+                return;
+
+            string payload =
+                string.Join(
+                    "|",
+                    targetPlayerId,
+                    lootMode);
+
+            byte[] packet =
+                BuildPacket(
+                    73,
+                    payload);
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send party invite request: " +
+                $"{ex.Message}");
+        }
+    }
     private byte[] BuildPacket(ushort packetType, string data)
     {
         byte[] dataBytes = Encoding.UTF8.GetBytes(data);

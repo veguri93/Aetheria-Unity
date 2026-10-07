@@ -230,6 +230,11 @@ public static class ClientPacketHandler
                     packet);
                 break;
 
+            case 74:
+                PartyInviteReceivedPacketHandler.Handle(
+                    packet);
+                break;
+
             default:
                 Debug.LogWarning(
                     $"Unknown packet type: {packet.Type}");
