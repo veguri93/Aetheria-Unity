@@ -19,6 +19,14 @@ public class MonsterManager : MonoBehaviour
 
         _monsters[monster.ObjectId] = monster;
     }
+    public bool RemoveMonster(
+    int objectId,
+    out Monster monster)
+    {
+        return _monsters.Remove(
+            objectId,
+            out monster);
+    }
 
     public bool TryGetMonster(
         int objectId,

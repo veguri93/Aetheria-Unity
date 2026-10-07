@@ -1,15 +1,24 @@
 using UnityEngine;
 
-public class LocalPlayer : MonoBehaviour
+public class LocalPlayer : MonoBehaviour, ITargetable
 {
     public static LocalPlayer Instance { get; private set; }
     [SerializeField]
     private PlayerNameplate playerNameplate;
+    [SerializeField]
+    private GameObject _selectionCircle;
     private Vector3 _lastPosition;
     private Quaternion _lastRotation;
-
+    public int PlayerId { get; private set; }
     public Vector3 Position => transform.position;
     public Quaternion Rotation => transform.rotation;
+    private string _playerName = string.Empty;
+
+    public int ObjectId =>
+        PlayerId;
+
+    public string Name =>
+        _playerName;
 
     private void Awake()
     {
@@ -23,6 +32,12 @@ public class LocalPlayer : MonoBehaviour
 
         _lastPosition = transform.position;
         _lastRotation = transform.rotation;
+
+        if (_selectionCircle != null)
+        {
+            _selectionCircle.SetActive(
+                false);
+        }
     }
 
     private void Update()
@@ -38,9 +53,12 @@ public class LocalPlayer : MonoBehaviour
         }
     }
     public void SetPlayerInfo(
-    string playerName,
-    string title)
+        string playerName,
+        string title)
     {
+        _playerName =
+            playerName;
+
         if (playerNameplate == null)
         {
             Debug.LogWarning(
@@ -52,6 +70,27 @@ public class LocalPlayer : MonoBehaviour
         playerNameplate.SetPlayerInfo(
             playerName,
             title);
+    }
+    public void Select()
+    {
+        if (_selectionCircle != null)
+        {
+            _selectionCircle.SetActive(true);
+        }
+    }
+
+    public void Deselect()
+    {
+        if (_selectionCircle != null)
+        {
+            _selectionCircle.SetActive(false);
+        }
+    }
+    public void SetPlayerId(
+    int playerId)
+    {
+        PlayerId =
+            playerId;
     }
     public void SetSpawnPosition(
         Vector3 position,

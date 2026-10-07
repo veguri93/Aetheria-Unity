@@ -52,15 +52,22 @@ public class Npc : MonoBehaviour, ITargetable
 
     public void Select()
     {
-        if (_selectionCircle != null)
+        if (_selectionCircle == null)
         {
-            _selectionCircle.SetActive(
-                true);
+
+
+            return;
         }
+
+        _selectionCircle.SetActive(
+            true);
+
     }
 
     public void Deselect()
     {
+
+
         if (_selectionCircle != null)
         {
             _selectionCircle.SetActive(

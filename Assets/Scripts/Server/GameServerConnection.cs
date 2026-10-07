@@ -455,6 +455,558 @@ public class GameServerConnection : MonoBehaviour
                 $"{ex.Message}");
         }
     }
+
+    public async void SendMultiSellBuyRequest(
+    int npcObjectId,
+    int multiSellId,
+    int entryId,
+    int quantity)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (npcObjectId <= 0 ||
+                multiSellId <= 0 ||
+                entryId <= 0 ||
+                quantity <= 0)
+            {
+                return;
+            }
+
+            string data =
+                string.Join(
+                    "|",
+                    npcObjectId,
+                    multiSellId,
+                    entryId,
+                    quantity);
+
+            byte[] packet =
+                BuildPacket(
+                    46,
+                    data);
+
+            await _client
+                .GetStream()
+                .WriteAsync(
+                    packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send multisell buy request: " +
+                $"{ex.Message}");
+        }
+    }
+
+    public async void SendMultiSellOpenRequest(
+    int npcObjectId,
+    int multiSellId)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (npcObjectId <= 0 ||
+                multiSellId <= 0)
+            {
+                return;
+            }
+
+            string data =
+                string.Join(
+                    "|",
+                    npcObjectId,
+                    multiSellId);
+
+            byte[] packet =
+                BuildPacket(
+                    44,
+                    data);
+
+            await _client
+                .GetStream()
+                .WriteAsync(
+                    packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send multisell open request: " +
+                $"{ex.Message}");
+        }
+    }
+    public async void SendNpcInteractRequest(
+    int objectId)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (objectId <= 0)
+                return;
+
+            string data =
+                objectId.ToString();
+
+            byte[] packet =
+                BuildPacket(
+                    42,
+                    data);
+
+            await _client
+                .GetStream()
+                .WriteAsync(
+                    packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send NPC interact request: " +
+                $"{ex.Message}");
+        }
+    }
+    public async void SendTargetSelect(
+       int objectId)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (objectId < 0)
+                return;
+
+            byte[] packet =
+                BuildPacket(
+                    47,
+                    objectId.ToString());
+
+            await _client
+                .GetStream()
+                .WriteAsync(packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send target selection: " +
+                $"{ex.Message}");
+        }
+    }
+    public async void SendNpcHtmlPageRequest(
+    int npcObjectId,
+    int pageId)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (npcObjectId <= 0 ||
+                pageId < 0)
+            {
+                return;
+            }
+
+            string data =
+                string.Join(
+                    "|",
+                    npcObjectId,
+                    pageId);
+
+            byte[] packet =
+                BuildPacket(
+                    49,
+                    data);
+
+            await _client
+                .GetStream()
+                .WriteAsync(packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send NPC HTML page request: " +
+                $"{ex.Message}");
+        }
+    }
+    public async void SendTeleportRequest(
+    int npcObjectId,
+    int destinationId)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (npcObjectId <= 0 ||
+                destinationId <= 0)
+            {
+                return;
+            }
+
+            string data =
+                string.Join(
+                    "|",
+                    npcObjectId,
+                    destinationId);
+
+            byte[] packet =
+                BuildPacket(
+                    50,
+                    data);
+
+            await _client
+                .GetStream()
+                .WriteAsync(packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send teleport request: " +
+                $"{ex.Message}");
+        }
+    }
+
+    public async void SendClassChangeRequest(
+    int npcObjectId,
+    int classId)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (npcObjectId <= 0 ||
+                classId < 0)
+            {
+                return;
+            }
+
+            string data =
+                string.Join(
+                    "|",
+                    npcObjectId,
+                    classId);
+
+            byte[] packet =
+                BuildPacket(
+                    56,
+                    data);
+
+            await _client
+                .GetStream()
+                .WriteAsync(packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send class change request: " +
+                $"{ex.Message}");
+        }
+    }
+
+    public async void SendSkillLearnRequest(
+    int npcObjectId,
+    int skillId)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (npcObjectId <= 0 ||
+                skillId <= 0)
+            {
+                return;
+            }
+
+            string data =
+                string.Join(
+                    "|",
+                    npcObjectId,
+                    skillId);
+
+            byte[] packet =
+                BuildPacket(
+                    57,
+                    data);
+
+            await _client
+                .GetStream()
+                .WriteAsync(packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send skill learn request: " +
+                $"{ex.Message}");
+        }
+    }
+    public async void SendGuildCreateRequest(
+    int npcObjectId,
+    string guildName)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (npcObjectId <= 0 ||
+                string.IsNullOrWhiteSpace(
+                    guildName))
+            {
+                return;
+            }
+
+            string data =
+                string.Join(
+                    "|",
+                    npcObjectId,
+                    guildName.Trim());
+
+            byte[] packet =
+                BuildPacket(
+                    58,
+                    data);
+
+            await _client
+                .GetStream()
+                .WriteAsync(packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send guild create request: " +
+                $"{ex.Message}");
+        }
+    }
+    public async void SendGuildInviteRequest(
+        int targetPlayerId,
+        string message)
+    {
+
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+                return;
+
+            if (targetPlayerId <= 0)
+                return;
+
+            string payload =
+                $"{targetPlayerId}|{message}";
+
+            byte[] packet =
+                BuildPacket(
+                    60,
+                    payload);
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send guild invite request: " +
+                $"{ex.Message}");
+        }
+    }
+    public async void SendGuildInviteRejectRequest()
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            byte[] packet =
+                BuildPacket(
+                    62,
+                    string.Empty);
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send guild invite reject request: " +
+                $"{ex.Message}");
+        }
+    }
+
+    public async void SendGuildInviteAcceptRequest()
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            byte[] packet =
+                BuildPacket(
+                    63,
+                    string.Empty);
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send guild invite accept request: " +
+                $"{ex.Message}");
+        }
+    }
+    public async void SendGuildWindowRequest()
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            byte[] packet =
+                BuildPacket(
+                    64,
+                    string.Empty);
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send guild window request: " +
+                $"{ex.Message}");
+        }
+    }
+    public async void SendGuildMemberRoleChangeRequest(
+    int targetCharacterId,
+    int role)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (targetCharacterId <= 0)
+                return;
+
+            string payload =
+                $"{targetCharacterId}|{role}";
+
+            byte[] packet =
+                BuildPacket(
+                    66,
+                    payload);
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send guild member role change request: " +
+                $"{ex.Message}");
+        }
+    }
+    public async void SendGuildLeaveRequest()
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            byte[] packet =
+                BuildPacket(
+                    67,
+                    string.Empty);
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send guild leave request: " +
+                $"{ex.Message}");
+        }
+    }
+    public async void SendGuildDismissRequest(
+    int targetCharacterId)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (targetCharacterId <= 0)
+                return;
+
+            byte[] packet =
+                BuildPacket(
+                    69,
+                    targetCharacterId.ToString());
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send guild dismiss request: " +
+                $"{ex.Message}");
+        }
+    }
     private byte[] BuildPacket(ushort packetType, string data)
     {
         byte[] dataBytes = Encoding.UTF8.GetBytes(data);

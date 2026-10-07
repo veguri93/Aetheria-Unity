@@ -31,11 +31,6 @@ public class InventoryItemContextMenu : MonoBehaviour
         selectedItem = item;
         openedFrame = Time.frameCount;
 
-        Debug.Log(
-            $"[DROP UI] Context menu opened. " +
-            $"ObjectId={item.ObjectId}, " +
-            $"ItemId={item.ItemId}, " +
-            $"Quantity={item.Quantity}");
 
         gameObject.SetActive(true);
 

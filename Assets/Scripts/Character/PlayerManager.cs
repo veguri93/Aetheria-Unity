@@ -40,7 +40,21 @@ public class PlayerManager : MonoBehaviour
             $"RemotePlayer_{playerId}";
 
         RemotePlayer remotePlayer =
-            playerObject.AddComponent<RemotePlayer>();
+            playerObject.GetComponent<RemotePlayer>();
+
+        if (remotePlayer == null)
+        {
+            Debug.LogError(
+                $"Player prefab does not have a RemotePlayer component.");
+
+            Destroy(
+                playerObject);
+
+            return;
+        }
+
+        remotePlayer.enabled =
+    true;
 
         remotePlayer.Initialize(
             playerId,

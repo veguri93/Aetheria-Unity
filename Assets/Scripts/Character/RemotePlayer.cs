@@ -1,12 +1,22 @@
 using UnityEngine;
 
-public class RemotePlayer : MonoBehaviour
+public class RemotePlayer : MonoBehaviour, ITargetable
 {
+
     public int PlayerId { get; private set; }
 
     public string PlayerName { get; private set; } = string.Empty;
 
     public string Title { get; private set; } = string.Empty;
+
+    public int ObjectId =>
+    PlayerId;
+
+    public string Name =>
+        PlayerName;
+
+    [SerializeField]
+    private GameObject _selectionCircle;
 
     private Vector3 _targetPosition;
     private Quaternion _targetRotation;
@@ -33,7 +43,11 @@ public class RemotePlayer : MonoBehaviour
 
         PlayerName = playerName;
         Title = title;
-
+        if (_selectionCircle != null)
+        {
+            _selectionCircle.SetActive(
+                false);
+        }
         _targetPosition =
             transform.position;
 
@@ -98,5 +112,22 @@ public class RemotePlayer : MonoBehaviour
         _animator.SetBool(
             "Moving",
             moving);
+    }
+    public void Select()
+    {
+        if (_selectionCircle != null)
+        {
+            _selectionCircle.SetActive(
+                true);
+        }
+    }
+
+    public void Deselect()
+    {
+        if (_selectionCircle != null)
+        {
+            _selectionCircle.SetActive(
+                false);
+        }
     }
 }

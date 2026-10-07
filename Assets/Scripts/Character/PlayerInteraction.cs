@@ -30,7 +30,6 @@ public class PlayerInteraction : MonoBehaviour
     private void Update()
     {
         HandleShortcutHotkeys();
-
         if (pendingPickup == null)
             return;
 
@@ -113,8 +112,6 @@ public class PlayerInteraction : MonoBehaviour
     {
         if (skillDatabase == null)
         {
-            Debug.LogWarning(
-                "[SKILL] SkillDatabase is not assigned.");
 
             return;
         }
@@ -123,9 +120,6 @@ public class PlayerInteraction : MonoBehaviour
                 skillId,
                 out SkillClientData skill))
         {
-            Debug.LogWarning(
-                $"[SHORTCUT] F{slotNumber} skill failed: " +
-                $"SkillId={skillId} was not found.");
 
             return;
         }
@@ -152,11 +146,27 @@ public class PlayerInteraction : MonoBehaviour
                     ITargetable currentTarget =
                         TargetManager.Instance.CurrentTarget;
 
-                    if (currentTarget is not Monster target)
+                    if (currentTarget == null)
                     {
-                        Debug.LogWarning(
-                            $"[SHORTCUT] F{slotNumber} skill failed: " +
-                            $"no monster targeted.");
+
+                        return;
+                    }
+
+                    string targetEntityType;
+
+                    if (currentTarget is Monster)
+                    {
+                        targetEntityType =
+                            "Monster";
+                    }
+                    else if (currentTarget is RemotePlayer ||
+                             currentTarget is LocalPlayer)
+                    {
+                        targetEntityType =
+                            "Player";
+                    }
+                    else
+                    {
 
                         return;
                     }
@@ -164,18 +174,9 @@ public class PlayerInteraction : MonoBehaviour
                     GameServerConnection.Instance?
                         .SendSkillUseRequest(
                             skillId,
-                            "Monster",
-                            target.ObjectId,
+                            targetEntityType,
+                            currentTarget.ObjectId,
                             false);
-
-                    break;
-                }
-
-            default:
-                {
-                    Debug.LogWarning(
-                        $"[SHORTCUT] F{slotNumber} target type " +
-                        $"{skill.TargetType} is not implemented yet.");
 
                     break;
                 }
@@ -312,8 +313,10 @@ public class PlayerInteraction : MonoBehaviour
                 objectId);
     }
     public void OnNpcClicked(
-    Npc npc)
+       Npc npc)
     {
+
+
         if (npc == null)
             return;
 
@@ -335,9 +338,31 @@ public class PlayerInteraction : MonoBehaviour
             return;
         }
 
-        Debug.Log(
-            $"Interacted with NPC: {npc.Name} " +
-            $"Type={npc.Type} " +
-            $"ObjectId={npc.ObjectId}");
+        GameServerConnection.Instance?
+            .SendNpcInteractRequest(
+                npc.ObjectId);
+    }
+    public void OnRemotePlayerClicked(
+    RemotePlayer remotePlayer)
+    {
+        if (remotePlayer == null)
+            return;
+
+        pendingPickup = null;
+
+        _combat.StopAttack();
+
+        if (TargetManager.Instance == null)
+            return;
+
+        if (!ReferenceEquals(
+                TargetManager.Instance.CurrentTarget,
+                remotePlayer))
+        {
+            TargetManager.Instance.SetTarget(
+                remotePlayer);
+
+            return;
+        }
     }
 }

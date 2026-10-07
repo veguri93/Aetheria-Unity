@@ -81,6 +81,17 @@ public class PlayerInputController : MonoBehaviour
             return;
         }
 
+        RemotePlayer remotePlayer =
+    hit.collider.GetComponentInParent<RemotePlayer>();
+
+        if (remotePlayer != null)
+        {
+            _player.Interaction.OnRemotePlayerClicked(
+                remotePlayer);
+
+            return;
+        }
+
         Npc npc =
             hit.collider.GetComponentInParent<Npc>();
 

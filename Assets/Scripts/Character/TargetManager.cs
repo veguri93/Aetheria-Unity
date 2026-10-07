@@ -21,29 +21,45 @@ public class TargetManager : MonoBehaviour
     public void SetTarget(
         ITargetable target)
     {
+
         if (ReferenceEquals(
-               CurrentTarget,
-               target))
+                CurrentTarget,
+                target))
         {
+
+
             return;
         }
 
         if (CurrentTarget != null)
         {
+
+
             CurrentTarget.Deselect();
         }
 
         CurrentTarget =
             target;
 
+
+
         if (CurrentTarget != null)
         {
+
+
             CurrentTarget.Select();
+
+
+            GameServerConnection.Instance?
+                .SendTargetSelect(
+                    CurrentTarget.ObjectId);
         }
     }
 
     public void ClearTarget()
     {
+
+
         if (CurrentTarget != null)
         {
             CurrentTarget.Deselect();
@@ -51,5 +67,9 @@ public class TargetManager : MonoBehaviour
 
         CurrentTarget =
             null;
+
+        GameServerConnection.Instance?
+            .SendTargetSelect(
+                0);
     }
 }
