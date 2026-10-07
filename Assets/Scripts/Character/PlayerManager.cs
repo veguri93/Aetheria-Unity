@@ -74,9 +74,22 @@ public class PlayerManager : MonoBehaviour
                 name,
                 title);
         }
-    
-
 }
+
+    public void UpdatePlayerTitle(
+    int playerId,
+    string title)
+    {
+        if (!_remotePlayers.TryGetValue(
+                playerId,
+                out RemotePlayer remotePlayer))
+        {
+            return;
+        }
+
+        remotePlayer.SetTitle(
+            title);
+    }
 
     public void RemovePlayer(int playerId)
     {

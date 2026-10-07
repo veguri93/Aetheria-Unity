@@ -104,6 +104,23 @@ public class RemotePlayer : MonoBehaviour, ITargetable
             Time.time;
     }
 
+    public void SetTitle(
+    string title)
+    {
+        Title =
+            title;
+
+        PlayerNameplate playerNameplate =
+            GetComponentInChildren<PlayerNameplate>();
+
+        if (playerNameplate == null)
+            return;
+
+        playerNameplate.SetPlayerInfo(
+            PlayerName,
+            Title);
+    }
+
     private void SetMoving(bool moving)
     {
         if (_animator == null)

@@ -16,7 +16,7 @@ public class LocalPlayer : MonoBehaviour, ITargetable
 
     public int ObjectId =>
         PlayerId;
-
+    private string _title = string.Empty;
     public string Name =>
         _playerName;
 
@@ -59,6 +59,9 @@ public class LocalPlayer : MonoBehaviour, ITargetable
         _playerName =
             playerName;
 
+        _title =
+            title;
+
         if (playerNameplate == null)
         {
             Debug.LogWarning(
@@ -70,6 +73,19 @@ public class LocalPlayer : MonoBehaviour, ITargetable
         playerNameplate.SetPlayerInfo(
             playerName,
             title);
+    }
+    public void SetTitle(
+    string title)
+    {
+        _title =
+            title;
+
+        if (playerNameplate == null)
+            return;
+
+        playerNameplate.SetPlayerInfo(
+            _playerName,
+            _title);
     }
     public void Select()
     {

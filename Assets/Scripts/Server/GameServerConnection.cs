@@ -1007,6 +1007,35 @@ public class GameServerConnection : MonoBehaviour
                 $"{ex.Message}");
         }
     }
+    public async void SendGuildTitleChangeRequest(
+    string title)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            string payload =
+                title.Trim();
+
+            byte[] packet =
+                BuildPacket(
+                    71,
+                    payload);
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send guild title change request: " +
+                $"{ex.Message}");
+        }
+    }
     private byte[] BuildPacket(ushort packetType, string data)
     {
         byte[] dataBytes = Encoding.UTF8.GetBytes(data);

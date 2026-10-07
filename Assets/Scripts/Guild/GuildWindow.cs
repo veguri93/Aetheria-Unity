@@ -67,6 +67,10 @@ public class GuildWindow : MonoBehaviour
             memberName;
 
     }
+    public void OpenTitleWindow()
+    {
+        GuildTitleWindow.Instance?.Show();
+    }
     public void ClearMemberRows()
     {
         foreach (Transform child
