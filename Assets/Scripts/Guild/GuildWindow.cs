@@ -246,6 +246,25 @@ public class GuildWindow : MonoBehaviour
             remotePlayer.ObjectId,
             remotePlayer.Name);
     }
+    public void TestPartyInvite()
+    {
+        if (TargetManager.Instance == null)
+            return;
+
+        if (TargetManager.Instance.CurrentTarget
+            is not RemotePlayer remotePlayer)
+        {
+            Debug.LogWarning(
+                "Target a player first.");
+
+            return;
+        }
+
+        GameServerConnection.Instance?
+            .SendPartyInviteRequest(
+                remotePlayer.ObjectId,
+                1);
+    }
     public void SetLeadershipActionsVisible(
         bool isLeader,
         bool isViceCaptain)

@@ -235,6 +235,11 @@ public static class ClientPacketHandler
                     packet);
                 break;
 
+            case 77:
+                PartySnapshotPacketHandler.Handle(
+                    packet);
+                break;
+
             default:
                 Debug.LogWarning(
                     $"Unknown packet type: {packet.Type}");

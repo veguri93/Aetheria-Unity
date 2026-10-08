@@ -73,14 +73,22 @@ public class PartyInviteReceiveWindow : MonoBehaviour
 
     public void Accept()
     {
-        // Packet comes next.
+        Debug.Log(
+            "[PARTY] Accept clicked.");
+
+        GameServerConnection.Instance?
+            .SendPartyInviteAcceptRequest();
 
         Hide();
     }
 
     public void Reject()
     {
-        // Packet comes next.
+        Debug.Log(
+            "[PARTY] Reject clicked.");
+
+        GameServerConnection.Instance?
+            .SendPartyInviteRejectRequest();
 
         Hide();
     }

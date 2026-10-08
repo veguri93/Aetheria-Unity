@@ -1072,6 +1072,57 @@ public class GameServerConnection : MonoBehaviour
                 $"{ex.Message}");
         }
     }
+    public async void SendPartyInviteAcceptRequest()
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            byte[] packet =
+                BuildPacket(
+                    75,
+                    string.Empty);
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send party invite accept request: " +
+                $"{ex.Message}");
+        }
+    }
+
+    public async void SendPartyInviteRejectRequest()
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            byte[] packet =
+                BuildPacket(
+                    76,
+                    string.Empty);
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send party invite reject request: " +
+                $"{ex.Message}");
+        }
+    }
     private byte[] BuildPacket(ushort packetType, string data)
     {
         byte[] dataBytes = Encoding.UTF8.GetBytes(data);
