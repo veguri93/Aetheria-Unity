@@ -240,6 +240,11 @@ public static class ClientPacketHandler
                     packet);
                 break;
 
+            case 78:
+                PartyMemberVitalsPacketHandler.Handle(
+                    packet);
+                break;
+
             default:
                 Debug.LogWarning(
                     $"Unknown packet type: {packet.Type}");

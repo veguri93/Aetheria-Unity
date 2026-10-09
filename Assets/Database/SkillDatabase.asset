@@ -85,3 +85,9 @@ MonoBehaviour:
     icon: {fileID: 21300000, guid: 5af51047a8ed0db42bc121d396c0dbf4, type: 3}
     targetType: 1
     operateType: 2
+  - skillId: 10201
+    displayName: poison
+    description: empower
+    icon: {fileID: 21300000, guid: d07ca7c6b06d8924d8f3de821cbc1ec9, type: 3}
+    targetType: 1
+    operateType: 2

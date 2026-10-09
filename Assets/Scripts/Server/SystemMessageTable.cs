@@ -304,6 +304,34 @@ public static class SystemMessageTable
         42,
         "$1_HAS_BEEN_DISMISSED_FROM_THE_CLAN",
         "$1 has been dismissed from the clan.")
+},
+{
+    43,
+    new SystemMessage(
+        43,
+        "$1_REJECTED_PARTY_INVITATION",
+        "$1 rejected the party invitation.")
+},
+{
+    44,
+    new SystemMessage(
+        44,
+        "$1_JOINED_THE_PARTY",
+        "$1 joined the party.")
+},
+{
+    45,
+    new SystemMessage(
+        45,
+        "$1_LEFT_THE_PARTY",
+        "$1 left the party.")
+},
+{
+    46,
+    new SystemMessage(
+        46,
+        "YOU_HAVE_LEFT_THE_PARTY",
+        "You have left the party.")
 }
         };
 
