@@ -53,13 +53,19 @@ public static class PartySnapshotPacketHandler
         if (partyWindow == null)
             return;
 
-        partyWindow.ClearMemberRows();
-
         if (memberCount <= 1)
         {
+            partyWindow.ClearMemberRows();
+            partyWindow.ClearPartyState();
             partyWindow.Hide();
+
             return;
         }
+
+        partyWindow.SetPartyState(
+            lootMode);
+
+        partyWindow.ClearMemberRows();
 
         int index =
             3;

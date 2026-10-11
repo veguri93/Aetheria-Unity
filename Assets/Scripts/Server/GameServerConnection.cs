@@ -1123,6 +1123,46 @@ public class GameServerConnection : MonoBehaviour
                 $"{ex.Message}");
         }
     }
+
+    public async void SendPartyInviteByNameRequest(
+    string playerName,
+    int lootMode)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(
+                    playerName))
+            {
+                return;
+            }
+
+            string payload =
+                string.Join(
+                    "|",
+                    playerName.Trim(),
+                    lootMode);
+
+            byte[] packet =
+                BuildPacket(
+                    79,
+                    payload);
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send party invite by name request: " +
+                $"{ex.Message}");
+        }
+    }
     private byte[] BuildPacket(ushort packetType, string data)
     {
         byte[] dataBytes = Encoding.UTF8.GetBytes(data);

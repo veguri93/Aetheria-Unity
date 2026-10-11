@@ -332,6 +332,34 @@ public static class SystemMessageTable
         46,
         "YOU_HAVE_LEFT_THE_PARTY",
         "You have left the party.")
+},
+{
+    47,
+    new SystemMessage(
+        47,
+        "$1_PICKED_UP_$2",
+        "$1 picked up $2.")
+},
+{
+    48,
+    new SystemMessage(
+        48,
+        "$1_IS_OFFLINE_OR_NAME_IS_INCORRECT",
+        "$1 is offline or the character name is incorrect.")
+},
+{
+    49,
+    new SystemMessage(
+        49,
+        "PARTY_INVITATION_SENT",
+        "Party invitation sent.")
+},
+{
+    50,
+    new SystemMessage(
+        50,
+        "PARTY_INVITATION_ALREADY_PENDING",
+        "You already have a pending party invitation.")
 }
         };
 

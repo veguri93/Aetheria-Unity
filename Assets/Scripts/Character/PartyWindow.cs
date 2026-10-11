@@ -4,6 +4,10 @@ public class PartyWindow : MonoBehaviour
 {
     public static PartyWindow Instance { get; private set; }
 
+    public bool IsInParty { get; private set; }
+
+    public int LootMode { get; private set; }
+
     [SerializeField]
     private Transform memberListContent;
 
@@ -32,7 +36,24 @@ public class PartyWindow : MonoBehaviour
         gameObject.SetActive(
             false);
     }
+    public void SetPartyState(
+    int lootMode)
+    {
+        IsInParty =
+            true;
 
+        LootMode =
+            lootMode;
+    }
+
+    public void ClearPartyState()
+    {
+        IsInParty =
+            false;
+
+        LootMode =
+            0;
+    }
     public void ClearMemberRows()
     {
         foreach (Transform child

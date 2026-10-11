@@ -246,7 +246,7 @@ public class GuildWindow : MonoBehaviour
             remotePlayer.ObjectId,
             remotePlayer.Name);
     }
-    public void TestPartyInvite()
+    public void InviteTargetToParty()
     {
         if (TargetManager.Instance == null)
             return;
@@ -260,10 +260,23 @@ public class GuildWindow : MonoBehaviour
             return;
         }
 
-        GameServerConnection.Instance?
-            .SendPartyInviteRequest(
-                remotePlayer.ObjectId,
-                1);
+        PartyWindow partyWindow =
+            PartyWindow.Instance;
+
+        if (partyWindow != null &&
+            partyWindow.IsInParty)
+        {
+            GameServerConnection.Instance?
+                .SendPartyInviteRequest(
+                    remotePlayer.ObjectId,
+                    partyWindow.LootMode);
+
+            return;
+        }
+
+        PartyLootModeWindow.Instance?
+            .Show(
+                remotePlayer.ObjectId);
     }
     public void SetLeadershipActionsVisible(
         bool isLeader,

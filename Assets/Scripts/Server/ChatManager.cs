@@ -190,10 +190,14 @@ public class ChatManager : MonoBehaviour
         }
     }
 
-    private void OnMessageSubmitted(string message)
+    private void OnMessageSubmitted(
+        string message)
     {
-        if (string.IsNullOrWhiteSpace(message))
+        if (string.IsNullOrWhiteSpace(
+                message))
+        {
             return;
+        }
 
         if (_connection == null)
         {
@@ -204,17 +208,111 @@ public class ChatManager : MonoBehaviour
                 return;
         }
 
+        message =
+            message.Trim();
+
+        if (message.Equals(
+                "/invite target",
+                System.StringComparison.OrdinalIgnoreCase))
+        {
+            HandleInviteTargetCommand();
+
+            ClearInput();
+
+            return;
+        }
+
+        if (message.StartsWith(
+                "/invite ",
+                System.StringComparison.OrdinalIgnoreCase))
+        {
+            string playerName =
+                message.Substring(
+                    "/invite ".Length)
+                .Trim();
+
+            if (!string.IsNullOrWhiteSpace(
+                    playerName))
+            {
+                HandleInviteByNameCommand(
+                    playerName);
+            }
+
+            ClearInput();
+
+            return;
+        }
+
         ChatType chatType =
             (ChatType)_chatTypeDropdown.value;
 
         _connection.SendChatMessage(
             chatType,
-            message.Trim());
+            message);
 
-        _chatInput.text = string.Empty;
-        _chatInput.ActivateInputField();
+        ClearInput();
     }
 
+    private void HandleInviteByNameCommand(
+    string playerName)
+    {
+        PartyWindow partyWindow =
+            PartyWindow.Instance;
+
+        if (partyWindow != null &&
+            partyWindow.IsInParty)
+        {
+            _connection.SendPartyInviteByNameRequest(
+                playerName,
+                partyWindow.LootMode);
+
+            return;
+        }
+
+        PartyLootModeWindow.Instance?
+            .ShowByName(
+                playerName);
+    }
+
+    private void HandleInviteTargetCommand()
+    {
+        if (TargetManager.Instance == null)
+            return;
+
+        if (TargetManager.Instance.CurrentTarget
+            is not RemotePlayer remotePlayer)
+        {
+            Debug.LogWarning(
+                "Target a player first.");
+
+            return;
+        }
+
+        PartyWindow partyWindow =
+            PartyWindow.Instance;
+
+        if (partyWindow != null &&
+            partyWindow.IsInParty)
+        {
+            _connection.SendPartyInviteRequest(
+                remotePlayer.ObjectId,
+                partyWindow.LootMode);
+
+            return;
+        }
+
+        PartyLootModeWindow.Instance?
+            .Show(
+                remotePlayer.ObjectId);
+    }
+
+    private void ClearInput()
+    {
+        _chatInput.text =
+            string.Empty;
+
+        _chatInput.ActivateInputField();
+    }
     public string ColorText(
     GameMessageType type,
     string text)
