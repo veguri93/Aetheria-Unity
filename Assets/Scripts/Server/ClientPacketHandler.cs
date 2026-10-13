@@ -245,6 +245,11 @@ public static class ClientPacketHandler
                     packet);
                 break;
 
+            case 80:
+                QuestSnapshotPacketHandler.Handle(
+                    packet);
+                break;
+
             default:
                 Debug.LogWarning(
                     $"Unknown packet type: {packet.Type}");

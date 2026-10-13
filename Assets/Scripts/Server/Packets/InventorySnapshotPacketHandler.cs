@@ -31,7 +31,7 @@ public static class InventorySnapshotPacketHandler
             string[] parts =
                 entry.Split(',');
 
-            if (parts.Length != 4)
+            if (parts.Length < 4)
                 continue;
 
             if (!int.TryParse(
@@ -50,12 +50,23 @@ public static class InventorySnapshotPacketHandler
             string equippedSlot =
                 parts[3];
 
+            bool isQuestItem =
+                false;
+
+            if (parts.Length >= 5)
+            {
+                bool.TryParse(
+                    parts[4],
+                    out isQuestItem);
+            }
+
             ClientItemInstance item =
                 new(
                     objectId,
                     itemId,
                     quantity,
-                    equippedSlot);
+                    equippedSlot,
+                    isQuestItem);
 
             ClientInventory.Add(
                 item);

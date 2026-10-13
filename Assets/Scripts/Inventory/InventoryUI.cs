@@ -3,6 +3,12 @@ using UnityEngine;
 
 public class InventoryUI : MonoBehaviour
 {
+    private enum InventoryView
+    {
+        Items,
+        QuestItems
+    }
+
     [SerializeField]
     private InventorySlotUI slotPrefab;
 
@@ -23,6 +29,9 @@ public class InventoryUI : MonoBehaviour
     private readonly List<int> itemOrder =
         new();
 
+    private InventoryView currentView =
+        InventoryView.Items;
+
     private void Start()
     {
         for (int i = 0; i < slotCount; i++)
@@ -32,9 +41,13 @@ public class InventoryUI : MonoBehaviour
                     slotPrefab,
                     itemGrid);
 
-            slot.SetSlotIndex(i);
+            slot.SetSlotIndex(
+                i);
+
             slot.Clear();
-            slots.Add(slot);
+
+            slots.Add(
+                slot);
         }
 
         Refresh();
@@ -43,19 +56,42 @@ public class InventoryUI : MonoBehaviour
     private void OnEnable()
     {
         if (slots.Count > 0)
+        {
             Refresh();
+        }
+    }
+
+    public void ShowItems()
+    {
+        currentView =
+            InventoryView.Items;
+
+        Refresh();
+    }
+
+    public void ShowQuestItems()
+    {
+        currentView =
+            InventoryView.QuestItems;
+
+        Refresh();
     }
 
     public void Refresh()
     {
         SyncItemOrder();
 
-        foreach (InventorySlotUI slot in slots)
+        foreach (InventorySlotUI slot
+            in slots)
+        {
             slot.Clear();
+        }
 
-        int slotIndex = 0;
+        int slotIndex =
+            0;
 
-        foreach (int objectId in itemOrder)
+        foreach (int objectId
+            in itemOrder)
         {
             if (!ClientInventory.TryGetItem(
                     objectId,
@@ -64,13 +100,17 @@ public class InventoryUI : MonoBehaviour
                 continue;
             }
 
-            // Equipped items remain owned,
-            // but are hidden from the bag grid.
-            if (item.IsEquipped)
+            if (!ShouldShowItem(
+                    item))
+            {
                 continue;
+            }
 
-            if (slotIndex >= slots.Count)
+            if (slotIndex >=
+                slots.Count)
+            {
                 break;
+            }
 
             if (!itemVisualDatabase.TryGet(
                     item.ItemId,
@@ -89,15 +129,18 @@ public class InventoryUI : MonoBehaviour
             slotIndex++;
         }
     }
+
     public void MoveItem(
-    int objectId,
-    int targetSlotIndex)
+        int objectId,
+        int targetSlotIndex)
     {
         SyncItemOrder();
 
-        List<int> visibleItems = new();
+        List<int> visibleItems =
+            new();
 
-        foreach (int id in itemOrder)
+        foreach (int id
+            in itemOrder)
         {
             if (!ClientInventory.TryGetItem(
                     id,
@@ -106,19 +149,25 @@ public class InventoryUI : MonoBehaviour
                 continue;
             }
 
-            if (item.IsEquipped)
+            if (!ShouldShowItem(
+                    item))
+            {
                 continue;
+            }
 
-            visibleItems.Add(id);
+            visibleItems.Add(
+                id);
         }
 
         int oldIndex =
-            visibleItems.IndexOf(objectId);
+            visibleItems.IndexOf(
+                objectId);
 
         if (oldIndex == -1)
             return;
 
-        visibleItems.RemoveAt(oldIndex);
+        visibleItems.RemoveAt(
+            oldIndex);
 
         targetSlotIndex =
             Mathf.Clamp(
@@ -131,46 +180,80 @@ public class InventoryUI : MonoBehaviour
             objectId);
 
         HashSet<int> visibleSet =
-            new(visibleItems);
+            new(
+                visibleItems);
 
-        int visibleIndex = 0;
+        int visibleIndex =
+            0;
 
-        for (int i = 0; i < itemOrder.Count; i++)
+        for (int i = 0;
+            i < itemOrder.Count;
+            i++)
         {
-            if (!visibleSet.Contains(itemOrder[i]))
+            if (!visibleSet.Contains(
+                    itemOrder[i]))
+            {
                 continue;
+            }
 
             itemOrder[i] =
-                visibleItems[visibleIndex];
+                visibleItems[
+                    visibleIndex];
 
             visibleIndex++;
         }
 
         Refresh();
     }
+
+    private bool ShouldShowItem(
+        ClientItemInstance item)
+    {
+        if (item.IsEquipped)
+            return false;
+
+        if (currentView ==
+            InventoryView.Items)
+        {
+            return !item.IsQuestItem;
+        }
+
+        return item.IsQuestItem;
+    }
+
     private void SyncItemOrder()
     {
         // Remove items that no longer exist.
-        for (int i = itemOrder.Count - 1; i >= 0; i--)
+        for (int i =
+                itemOrder.Count - 1;
+            i >= 0;
+            i--)
         {
             if (!ClientInventory.TryGetItem(
                     itemOrder[i],
                     out _))
             {
-                itemOrder.RemoveAt(i);
+                itemOrder.RemoveAt(
+                    i);
             }
         }
 
         // Add newly received items at the end.
-        foreach (ClientItemInstance item in ClientInventory.Items)
+        foreach (ClientItemInstance item
+            in ClientInventory.Items)
         {
-            if (!itemOrder.Contains(item.ObjectId))
-                itemOrder.Add(item.ObjectId);
+            if (!itemOrder.Contains(
+                    item.ObjectId))
+            {
+                itemOrder.Add(
+                    item.ObjectId);
+            }
         }
     }
+
     public void ShowItemTooltip(
-    ClientItemInstance item,
-    RectTransform itemRect)
+        ClientItemInstance item,
+        RectTransform itemRect)
     {
         if (!itemVisualDatabase.TryGet(
                 item.ItemId,
@@ -189,5 +272,4 @@ public class InventoryUI : MonoBehaviour
         InventoryItemContextMenu.Instance?.Hide();
         ItemTooltipUI.Instance?.Hide();
     }
-
 }

@@ -8,6 +8,8 @@ public class ClientItemInstance
 
     public string EquippedSlot { get; private set; }
 
+    public bool IsQuestItem { get; }
+
     public bool IsEquipped =>
         EquippedSlot != "None";
 
@@ -15,23 +17,36 @@ public class ClientItemInstance
         int objectId,
         int itemId,
         int quantity,
-        string equippedSlot)
+        string equippedSlot,
+        bool isQuestItem = false)
     {
-        ObjectId = objectId;
-        ItemId = itemId;
-        Quantity = quantity;
-        EquippedSlot = equippedSlot;
+        ObjectId =
+            objectId;
+
+        ItemId =
+            itemId;
+
+        Quantity =
+            quantity;
+
+        EquippedSlot =
+            equippedSlot;
+
+        IsQuestItem =
+            isQuestItem;
     }
 
     public void SetQuantity(
         int quantity)
     {
-        Quantity = quantity;
+        Quantity =
+            quantity;
     }
 
     public void SetEquippedSlot(
         string equippedSlot)
     {
-        EquippedSlot = equippedSlot;
+        EquippedSlot =
+            equippedSlot;
     }
 }
