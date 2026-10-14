@@ -232,6 +232,62 @@ public class NpcHtmlWindow : MonoBehaviour
                     break;
                 }
 
+            case "questaccept":
+                {
+                    if (actionId <= 0)
+                        return;
+
+                    GameServerConnection.Instance?
+                        .SendQuestAcceptRequest(
+                            _npcObjectId,
+                            actionId);
+
+                    break;
+                }
+
+            case "quest":
+                {
+                    if (actionId <= 0)
+                        return;
+
+                    GameServerConnection.Instance?
+                        .SendQuestNpcRequest(
+                            _npcObjectId,
+                            actionId);
+
+                    break;
+                }
+
+            case "questcontinue":
+                {
+                    if (actionId <= 0)
+                        return;
+
+                    GameServerConnection.Instance?
+                        .SendQuestContinueRequest(
+                            _npcObjectId,
+                            actionId);
+
+                    Hide();
+
+                    break;
+                }
+
+            case "questcomplete":
+                {
+                    if (actionId <= 0)
+                        return;
+
+                    GameServerConnection.Instance?
+                        .SendQuestCompleteRequest(
+                            _npcObjectId,
+                            actionId);
+
+                    Hide();
+
+                    break;
+                }
+
             default:
                 {
                     Debug.LogWarning(

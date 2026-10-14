@@ -1163,6 +1163,197 @@ public class GameServerConnection : MonoBehaviour
                 $"{ex.Message}");
         }
     }
+
+    public async void SendQuestAbandonRequest(
+    int questId)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (questId <= 0)
+                return;
+
+            byte[] packet =
+                BuildPacket(
+                    81,
+                    questId.ToString());
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send quest abandon request: " +
+                $"{ex.Message}");
+        }
+    }
+
+    public async void SendQuestNpcRequest(
+    int npcObjectId,
+    int questId)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (npcObjectId <= 0 ||
+                questId <= 0)
+            {
+                return;
+            }
+
+            string payload =
+                string.Join(
+                    "|",
+                    npcObjectId,
+                    questId);
+
+            byte[] packet =
+                BuildPacket(
+                    82,
+                    payload);
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send quest NPC request: " +
+                $"{ex.Message}");
+        }
+    }
+
+    public async void SendQuestAcceptRequest(
+    int npcObjectId,
+    int questId)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (npcObjectId <= 0 ||
+                questId <= 0)
+            {
+                return;
+            }
+
+            string payload =
+                string.Join(
+                    "|",
+                    npcObjectId,
+                    questId);
+
+            byte[] packet =
+                BuildPacket(
+                    83,
+                    payload);
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send quest accept request: " +
+                $"{ex.Message}");
+        }
+    }
+
+    public async void SendQuestContinueRequest(
+    int npcObjectId,
+    int questId)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (npcObjectId <= 0 ||
+                questId <= 0)
+            {
+                return;
+            }
+
+            string payload =
+                string.Join(
+                    "|",
+                    npcObjectId,
+                    questId);
+
+            byte[] packet =
+                BuildPacket(
+                    84,
+                    payload);
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send quest continue request: " +
+                $"{ex.Message}");
+        }
+    }
+
+    public async void SendQuestCompleteRequest(
+    int npcObjectId,
+    int questId)
+    {
+        try
+        {
+            if (_client == null ||
+                !_client.Connected)
+            {
+                return;
+            }
+
+            if (npcObjectId <= 0 ||
+                questId <= 0)
+            {
+                return;
+            }
+
+            string payload =
+                string.Join(
+                    "|",
+                    npcObjectId,
+                    questId);
+
+            byte[] packet =
+                BuildPacket(
+                    85,
+                    payload);
+
+            await _client.GetStream().WriteAsync(
+                packet);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(
+                $"Failed to send quest complete request: " +
+                $"{ex.Message}");
+        }
+    }
+
     private byte[] BuildPacket(ushort packetType, string data)
     {
         byte[] dataBytes = Encoding.UTF8.GetBytes(data);

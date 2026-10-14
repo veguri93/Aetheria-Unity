@@ -166,7 +166,22 @@ public class QuestWindow : MonoBehaviour
                 questId);
         }
     }
+    public void AbandonSelectedQuest()
+    {
+        if (_selectedQuestId <= 0)
+            return;
 
+        int questId =
+            _selectedQuestId;
+
+        ConfirmationWindow.Instance?.Show(
+            () =>
+            {
+                GameServerConnection.Instance?
+                    .SendQuestAbandonRequest(
+                        questId);
+            });
+    }
     public void RemoveQuest(
         int questId)
     {

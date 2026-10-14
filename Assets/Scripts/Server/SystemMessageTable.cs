@@ -360,6 +360,41 @@ public static class SystemMessageTable
         50,
         "PARTY_INVITATION_ALREADY_PENDING",
         "You already have a pending party invitation.")
+},
+{
+    51,
+    new SystemMessage(
+        51,
+        "YOU_HAVE_ACCEPTED_THE_QUEST",
+        "You have accepted the quest.")
+},
+{
+    52,
+    new SystemMessage(
+        52,
+        "YOU_HAVE_ABANDONED_THE_QUEST",
+        "You have abandoned the quest.")
+},
+{
+    53,
+    new SystemMessage(
+        53,
+        "YOU_HAVE_COMPLETED_THE_QUEST",
+        "You have completed the quest.")
+},
+{
+    54,
+    new SystemMessage(
+        54,
+        "YOU_HAVE_RECEIVED_$1",
+        "You have received $1.")
+},
+{
+    55,
+    new SystemMessage(
+        55,
+        "$1_DISAPPEARED_FROM_YOUR_INVENTORY",
+        "$1 disappeared from your inventory.")
 }
         };
 
