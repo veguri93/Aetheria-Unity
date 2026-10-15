@@ -22,6 +22,11 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float _minZoom = -2f;
     [SerializeField] private float _maxZoom = -12f;
 
+    [Header("Collision")]
+    [SerializeField] private LayerMask _collisionMask = ~0;
+    [SerializeField] private float _collisionRadius = 0.3f;
+    [SerializeField] private float _collisionPadding = 0.2f;
+
     private PlayerInputActions _controls;
     private float _currentZoom;
     private float _yawRotation;
@@ -79,14 +84,57 @@ public class CameraController : MonoBehaviour
     {
         float scroll = _controls.Player.Zoom.ReadValue<float>();
 
-        if (Mathf.Abs(scroll) < 0.01f)
-            return;
+        if (Mathf.Abs(scroll) >= 0.01f)
+        {
+            _currentZoom += scroll * 1f;
 
-        _currentZoom += scroll * 10f;
-        _currentZoom = Mathf.Clamp(_currentZoom, _maxZoom, _minZoom);
+            _currentZoom = Mathf.Clamp(
+                _currentZoom,
+                _maxZoom,
+                _minZoom);
+        }
+
+        float desiredDistance = Mathf.Abs(_currentZoom);
+        float actualDistance = desiredDistance;
+        bool obstructed = false;
+
+        // Detect obstacles between the camera pivot
+        // and the desired camera position.
+        if (Physics.SphereCast(
+            _pitch.position,
+            _collisionRadius,
+            -_pitch.forward,
+            out RaycastHit hit,
+            desiredDistance,
+            _collisionMask,
+            QueryTriggerInteraction.Ignore))
+        {
+            actualDistance = Mathf.Clamp(
+                hit.distance - _collisionPadding,
+                0.5f,
+                desiredDistance);
+
+            obstructed = true;
+        }
 
         Vector3 position = _camera.transform.localPosition;
-        position.z = Mathf.Lerp(position.z, _currentZoom, 10f * Time.deltaTime);
+
+        float targetZ = -actualDistance;
+
+        // Move inward immediately to avoid clipping.
+        if (obstructed && position.z < targetZ)
+        {
+            position.z = targetZ;
+        }
+        else
+        {
+            // Smooth zoom and return after obstacles disappear.
+            position.z = Mathf.Lerp(
+                position.z,
+                targetZ,
+                10f * Time.deltaTime);
+        }
+
         _camera.transform.localPosition = position;
     }
 

@@ -116,9 +116,11 @@ public class InventorySlotUI :
             icon != null);
 
         quantityText.text =
-            item.Quantity > 1
-                ? item.Quantity.ToString()
-                : string.Empty;
+            item.Quantity > 999
+                ? "999+"
+                : item.Quantity > 1
+                    ? item.Quantity.ToString()
+                    : string.Empty;
     }
 
     public void Clear()
