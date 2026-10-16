@@ -108,10 +108,25 @@ public class LocalPlayer : MonoBehaviour, ITargetable
         PlayerId =
             playerId;
     }
+
+
     public void SetSpawnPosition(
         Vector3 position,
         float rotationY)
     {
+        CharacterController controller =
+            GetComponent<CharacterController>();
+
+        // Temporarily disable the controller
+        // while applying the server spawn position.
+        bool wasEnabled =
+            controller != null && controller.enabled;
+
+        if (wasEnabled)
+        {
+            controller.enabled = false;
+        }
+
         transform.position = position;
 
         transform.rotation =
@@ -119,6 +134,19 @@ public class LocalPlayer : MonoBehaviour, ITargetable
                 0f,
                 rotationY,
                 0f);
+
+        if (wasEnabled)
+        {
+            controller.enabled = true;
+        }
+
+        PlayerMovement movement =
+            GetComponent<PlayerMovement>();
+
+        if (movement != null)
+        {
+            movement.OnSpawnReceived();
+        }
 
         PlayerMovementNetwork network =
             GetComponent<PlayerMovementNetwork>();
@@ -128,5 +156,9 @@ public class LocalPlayer : MonoBehaviour, ITargetable
             network.OnSpawnReceived();
         }
 
+        Debug.Log(
+            $"[SPAWN] Player positioned at {transform.position}");
     }
+
+
 }

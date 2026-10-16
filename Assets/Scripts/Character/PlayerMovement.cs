@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -12,8 +13,14 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector3 _destination;
     private bool _isMoving;
+    private bool _hasSpawned;
 
     public bool IsMoving => _isMoving;
+
+    [Header("Gravity")]
+    [SerializeField] private float _gravity = -20f;
+
+    private float _verticalVelocity;
 
     private void Awake()
     {
@@ -21,11 +28,16 @@ public class PlayerMovement : MonoBehaviour
         _animator = GetComponentInChildren<Animator>();
 
         _destination = transform.position;
+        _hasSpawned = false;
     }
 
     private void Update()
     {
+        if (!_hasSpawned)
+            return;
+
         Move();
+        ApplyGravity();
     }
 
     private void Move()
@@ -36,7 +48,7 @@ public class PlayerMovement : MonoBehaviour
         Vector3 direction =
             _destination - transform.position;
 
-        direction.y = 0;
+        direction.y = 0f;
 
         float distance =
             direction.magnitude;
@@ -64,6 +76,39 @@ public class PlayerMovement : MonoBehaviour
             Time.deltaTime);
     }
 
+    private void ApplyGravity()
+    {
+        if (_controller.isGrounded &&
+            _verticalVelocity < 0f)
+        {
+            _verticalVelocity = -2f;
+        }
+
+        _verticalVelocity +=
+            _gravity * Time.deltaTime;
+
+        _controller.Move(
+            Vector3.up *
+            _verticalVelocity *
+            Time.deltaTime);
+    }
+
+    public void OnSpawnReceived()
+    {
+        _destination = transform.position;
+        _isMoving = false;
+        _verticalVelocity = 0f;
+
+        if (_animator != null)
+        {
+            _animator.SetBool(
+                "Moving",
+                false);
+        }
+
+        _hasSpawned = true;
+    }
+
     public void MoveTo(Vector3 position)
     {
         _destination = position;
@@ -76,9 +121,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void Stop()
     {
-        _destination =
-            transform.position;
-
+        _destination = transform.position;
         _isMoving = false;
 
         _animator.SetBool(
