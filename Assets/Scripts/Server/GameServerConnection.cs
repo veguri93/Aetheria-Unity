@@ -44,11 +44,12 @@ public class GameServerConnection : MonoBehaviour
                 ClientPacketHandler.Handle(incomingPacket);
             }
         }
+
         catch (System.Exception ex)
         {
-            Debug.LogError(
-                $"Failed to connect to GameServer: {ex.Message}");
+            Debug.LogException(ex);
         }
+
     }
 
     public async void SendPlayerMove(

@@ -76,5 +76,9 @@ public static class EquipmentChangedPacketHandler
             Object.FindAnyObjectByType<InventoryUI>();
 
         inventoryUI?.Refresh();
+
+        LocalPlayer.Instance?
+    .GetComponent<CharacterEquipmentVisual>()?
+    .Refresh();
     }
 }

@@ -156,8 +156,6 @@ public class LocalPlayer : MonoBehaviour, ITargetable
             network.OnSpawnReceived();
         }
 
-        Debug.Log(
-            $"[SPAWN] Player positioned at {transform.position}");
     }
 
 

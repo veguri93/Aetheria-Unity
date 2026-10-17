@@ -1,3 +1,4 @@
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,18 +8,26 @@ using UnityEngine;
 public class ItemVisualDatabase : ScriptableObject
 {
     [SerializeField]
-    private List<ItemVisualDefinition> items =
-        new();
+    private List<ItemVisualAsset> itemAssets = new();
 
     public bool TryGet(
         int itemId,
         out ItemVisualDefinition definition)
     {
-        definition =
-            items.Find(
-                item =>
-                    item.ItemId == itemId);
+        foreach (ItemVisualAsset asset in itemAssets)
+        {
+            if (asset == null ||
+                asset.Definition == null)
+                continue;
 
-        return definition != null;
+            if (asset.Definition.ItemId != itemId)
+                continue;
+
+            definition = asset.Definition;
+            return true;
+        }
+
+        definition = null;
+        return false;
     }
 }

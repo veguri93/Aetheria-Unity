@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 423eb8356acff7c4ea00a60b8e3e46f5, type: 3}
+  m_Name: Crystalbranch
+  m_EditorClassIdentifier: Assembly-CSharp::ItemVisualAsset
+  definition:
+    itemId: 1004
+    itemName: Crystalbranch
+    type: Staff
+    description: Staff Made By Wood that being empowered by Crystal of Life.
+    icon: {fileID: 21300000, guid: bda6b5f4eacb64c4c911d03249d13cb6, type: 3}
+    prefab: {fileID: 919132149155446097, guid: 2e438f6a4d0a2ad46b33b3ad3c729c8b, type: 3}
+    groundPosition: {x: 0, y: 2, z: 0}
+    groundRotation: {x: 180, y: 0, z: 0}
+    groundScale: {x: 2, y: 2, z: 2}
