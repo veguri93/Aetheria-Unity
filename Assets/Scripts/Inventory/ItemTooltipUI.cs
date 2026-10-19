@@ -1,9 +1,15 @@
+
+using System.Globalization;
 using TMPro;
 using UnityEngine;
 
 public class ItemTooltipUI : MonoBehaviour
 {
-    public static ItemTooltipUI Instance { get; private set; }
+    public static ItemTooltipUI Instance
+    {
+        get;
+        private set;
+    }
 
     [SerializeField]
     private GameObject tooltipRoot;
@@ -15,12 +21,25 @@ public class ItemTooltipUI : MonoBehaviour
     private TMP_Text itemTypeText;
 
     [SerializeField]
+    private TMP_Text itemTierText;
+
+    [SerializeField]
+    private TMP_Text statsText;
+
+    [SerializeField]
     private TMP_Text descriptionText;
+
+
+    [SerializeField]
+    private RectTransform separatorTop;
+
+    [SerializeField]
+    private RectTransform separatorBottom;
+
 
     private void Awake()
     {
         Instance = this;
-
         tooltipRoot.SetActive(false);
     }
 
@@ -31,14 +50,155 @@ public class ItemTooltipUI : MonoBehaviour
         itemNameText.text =
             definition.ItemName;
 
-        itemTypeText.text =
-            $"Type: {definition.Type}";
+        if (ClientInventory.TryGetItemByItemId(
+                definition.ItemId,
+                out ClientItemInstance item))
+        {
+            itemTypeText.text =
+                string.IsNullOrEmpty(item.DisplayType)
+                    ? definition.Type
+                    : item.DisplayType;
+
+
+
+            itemTierText.text =
+                item.Tier == "None"
+                    ? string.Empty
+                    : item.Tier;
+
+
+
+            bool hasStats =
+                item.PhysicalAttack.HasValue ||
+                item.MagicAttack.HasValue ||
+                item.CastingSpeed.HasValue ||
+                item.AttackSpeed.HasValue;
+
+            statsText.gameObject.SetActive(
+                hasStats);
+
+            statsText.text =
+                "P.Atk: " + FormatStat(
+                    item.PhysicalAttack) + "\n" +
+                "M.Atk: " + FormatStat(
+                    item.MagicAttack) + "\n" +
+                "Casting Speed: " + FormatStat(
+                    item.CastingSpeed) + "\n" +
+                "Attack Speed: " + FormatStat(
+                    item.AttackSpeed);
+        }
+        else
+        {
+            itemTypeText.text =
+                definition.Type;
+
+            itemTierText.text =
+                string.Empty;
+
+            statsText.text =
+                string.Empty;
+
+            statsText.gameObject.SetActive(false);
+        }
 
         descriptionText.text =
             definition.Description;
 
-        ShowAt(
-            itemRect);
+        UpdateLayout();
+
+        ShowAt(itemRect);
+    }
+
+
+    private void UpdateLayout()
+    {
+        RectTransform tooltipRect =
+            tooltipRoot.GetComponent<RectTransform>();
+
+        RectTransform statsRect =
+            statsText.rectTransform;
+
+        RectTransform descriptionRect =
+            descriptionText.rectTransform;
+
+        float contentWidth =
+            tooltipRect.rect.width - 20f;
+
+        float currentY = 54f;
+
+        bool hasStats =
+            statsText.gameObject.activeSelf;
+
+        bool hasDescription =
+            !string.IsNullOrWhiteSpace(
+                descriptionText.text);
+
+        separatorTop.gameObject.SetActive(
+            hasStats || hasDescription);
+
+        separatorBottom.gameObject.SetActive(
+            hasStats && hasDescription);
+
+        if (hasStats)
+        {
+            float statsHeight =
+                Mathf.Ceil(
+                    statsText.GetPreferredValues(
+                        statsText.text,
+                        contentWidth,
+                        Mathf.Infinity).y) + 2f;
+
+            statsRect.anchoredPosition =
+                new Vector2(0f, -currentY);
+
+            statsRect.SetSizeWithCurrentAnchors(
+                RectTransform.Axis.Vertical,
+                statsHeight);
+
+            currentY += statsHeight + 12f;
+        }
+
+        if (hasStats && hasDescription)
+        {
+            separatorBottom.anchoredPosition =
+                new Vector2(0f, -currentY);
+
+            currentY += 10f;
+        }
+
+        if (hasDescription)
+        {
+            float descriptionHeight =
+                Mathf.Ceil(
+                    descriptionText.GetPreferredValues(
+                        descriptionText.text,
+                        contentWidth,
+                        Mathf.Infinity).y) + 2f;
+
+            descriptionRect.anchoredPosition =
+                new Vector2(0f, -currentY);
+
+            descriptionRect.SetSizeWithCurrentAnchors(
+                RectTransform.Axis.Vertical,
+                descriptionHeight);
+
+            currentY += descriptionHeight;
+        }
+
+        tooltipRect.SetSizeWithCurrentAnchors(
+            RectTransform.Axis.Vertical,
+            currentY + 14f);
+    }
+
+
+    private static string FormatStat(
+        double? value)
+    {
+        return value.HasValue
+            ? value.Value.ToString(
+                "0.##",
+                CultureInfo.InvariantCulture)
+            : "—";
     }
 
     public void ShowSkill(
@@ -51,36 +211,42 @@ public class ItemTooltipUI : MonoBehaviour
         itemTypeText.text =
             "Skill";
 
+        itemTierText.text =
+            string.Empty;
+
+        statsText.text =
+            string.Empty;
+
+        statsText.gameObject.SetActive(false);
+
         descriptionText.text =
             skill.Description;
 
-        ShowAt(
-            skillRect);
+        UpdateLayout();
+
+        ShowAt(skillRect);
     }
 
     private void ShowAt(
         RectTransform sourceRect)
     {
+        tooltipRoot.transform.SetAsLastSibling();
+
         tooltipRoot.SetActive(true);
 
         RectTransform tooltipRect =
             tooltipRoot.GetComponent<RectTransform>();
 
-        Vector3[] corners =
-            new Vector3[4];
+        Vector3[] corners = new Vector3[4];
 
-        sourceRect.GetWorldCorners(
-            corners);
+        sourceRect.GetWorldCorners(corners);
 
         Vector3 bottomCenter =
             (corners[0] + corners[3]) / 2f;
 
         tooltipRect.position =
             bottomCenter +
-            new Vector3(
-                0,
-                -5f,
-                0);
+            new Vector3(0, -5f, 0);
     }
 
     public void Hide()

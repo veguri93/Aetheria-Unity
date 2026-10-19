@@ -29,6 +29,6 @@ public class PlayerProgressUI : MonoBehaviour
         long nextLevelExperience)
     {
         levelText.text =
-            level.ToString();
+            $"Level {level}";
     }
 }
