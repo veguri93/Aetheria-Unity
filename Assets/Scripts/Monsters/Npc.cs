@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class Npc : MonoBehaviour, ITargetable
 {
-    [SerializeField]
-    private GameObject _selectionCircle;
 
     private int _objectId;
     private int _templateId;
@@ -29,10 +27,7 @@ public class Npc : MonoBehaviour, ITargetable
 
     private void Awake()
     {
-        if (_selectionCircle != null)
-        {
-            _selectionCircle.SetActive(false);
-        }
+        
     }
 
     public void Initialize(
@@ -56,17 +51,11 @@ public class Npc : MonoBehaviour, ITargetable
 
     public void Select()
     {
-        if (_selectionCircle == null)
-            return;
-
-        _selectionCircle.SetActive(true);
+        OverheadTargetIndicator.SetFor(this, TargetIndicatorState.Selected);
     }
 
     public void Deselect()
     {
-        if (_selectionCircle != null)
-        {
-            _selectionCircle.SetActive(false);
-        }
+        OverheadTargetIndicator.SetFor(this, TargetIndicatorState.None);
     }
 }

@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class Monster : MonoBehaviour, ITargetable
 {
-    [SerializeField] private GameObject _selectionCircle;
     [SerializeField] private HealthBar _healthBar;
     [SerializeField] private int _maxHp = 100;
 
@@ -21,6 +20,9 @@ public class Monster : MonoBehaviour, ITargetable
     private bool _hasServerMovementTarget;
 
     public Animator Animator => _animator;
+
+    public bool HasServerHealth { get; private set; }
+    public event System.Action<int, int, bool> ServerHealthChanged;
 
     public int CurrentHp => _currentHp;
     public int MaxHp => _maxHp;
@@ -48,11 +50,7 @@ public class Monster : MonoBehaviour, ITargetable
         _serverTargetRotation =
             transform.rotation;
 
-        if (_selectionCircle != null)
-        {
-            _selectionCircle.SetActive(
-                false);
-        }
+        
 
         if (_healthBar != null)
         {
@@ -149,32 +147,31 @@ _serverTargetRotation);
             objectId;
     }
 
+
     public void SetNpcName(
-        string name)
+        string name,
+        string title = "")
     {
-        _name =
-            name;
+        _name = name;
+
+        if (TryGetComponent<WorldNameplate>(out var nameplate))
+        {
+            nameplate.SetInfo(
+                name,
+                title);
+        }
     }
+
 
     public void Select()
     {
-        if (_isDead)
-            return;
-
-        if (_selectionCircle != null)
-        {
-            _selectionCircle.SetActive(
-                true);
-        }
+        if (_isDead) return;
+        OverheadTargetIndicator.SetFor(this, TargetIndicatorState.Selected);
     }
 
     public void Deselect()
     {
-        if (_selectionCircle != null)
-        {
-            _selectionCircle.SetActive(
-                false);
-        }
+        OverheadTargetIndicator.SetFor(this, TargetIndicatorState.None);
     }
 
     public void TakeDamage(
@@ -219,8 +216,12 @@ _serverTargetRotation);
         int currentHp,
         int maxHp)
     {
-        _currentHp =
-            currentHp;
+        bool firstSnapshot = !HasServerHealth;
+        int previousHp = _currentHp;
+        _maxHp = Mathf.Max(1, maxHp);
+        _currentHp = Mathf.Clamp(currentHp, 0, _maxHp);
+        HasServerHealth = true;
+        ServerHealthChanged?.Invoke(_currentHp, _maxHp, firstSnapshot);
 
         if (_healthBar != null)
         {
@@ -235,18 +236,27 @@ _serverTargetRotation);
             return;
         }
 
-        if (_ai != null &&
+        // A spawn/selection snapshot must not provoke an otherwise idle monster.
+        if (!firstSnapshot && _currentHp < previousHp && _ai != null &&
             LocalPlayer.Instance != null)
         {
-            _ai.SetAggro(
-                LocalPlayer.Instance);
+            _ai.SetAggro(LocalPlayer.Instance);
         }
+    }
+
+    private void OnDisable()
+    {
+        if (TargetManager.Instance && ReferenceEquals(TargetManager.Instance.CurrentTarget, this))
+            TargetManager.Instance.ClearTarget();
     }
 
     private void Die()
     {
         _isDead =
             true;
+        if (TargetManager.Instance && ReferenceEquals(TargetManager.Instance.CurrentTarget, this))
+            TargetManager.Instance.ClearTarget();
+        else TargetManager.Instance?.ClearAttackTarget(this);
 
         _hasServerMovementTarget =
             false;
@@ -285,6 +295,7 @@ Quaternion.Euler(
 
         _isDead =
             false;
+        HasServerHealth = false;
 
         _currentHp =
             _maxHp;

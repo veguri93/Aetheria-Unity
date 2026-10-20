@@ -250,6 +250,10 @@ public static class ClientPacketHandler
                     packet);
                 break;
 
+            case 86:
+                PlayerGuildChangedPacketHandler.Handle(packet);
+                break;
+
             default:
                 Debug.LogWarning(
                     $"Unknown packet type: {packet.Type}");

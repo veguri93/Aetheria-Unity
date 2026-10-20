@@ -4,7 +4,44 @@ public class TargetManager : MonoBehaviour
 {
     public static TargetManager Instance { get; private set; }
 
+    public event System.Action<ITargetable> TargetChanged;
+
     public ITargetable CurrentTarget { get; private set; }
+    public ITargetable AttackTarget { get; private set; }
+
+    // Presentation state only: combat/network authority remains in existing systems.
+    public void SetAttackTarget(ITargetable target)
+    {
+        AttackTarget = target;
+        RefreshIndicator();
+    }
+
+    public void ClearAttackTarget(ITargetable target)
+    {
+        if (!ReferenceEquals(AttackTarget, target)) return;
+        AttackTarget = null;
+        RefreshIndicator();
+    }
+
+    private void RefreshIndicator()
+    {
+        if (CurrentTarget is Component component && !component) return;
+        if (CurrentTarget is Monster monster && monster.IsDead)
+        {
+            OverheadTargetIndicator.SetFor(CurrentTarget, TargetIndicatorState.None);
+            return;
+        }
+        OverheadTargetIndicator.SetFor(CurrentTarget,
+            ReferenceEquals(CurrentTarget, AttackTarget) ? TargetIndicatorState.Hostile : TargetIndicatorState.Selected);
+    }
+
+    private void LateUpdate()
+    {
+        if (AttackTarget is Component attacker && (!attacker || !attacker.gameObject.activeInHierarchy))
+            AttackTarget = null;
+        if (CurrentTarget is Component component && (!component || !component.gameObject.activeInHierarchy))
+            ClearTarget();
+    }
 
     private void Awake()
     {
@@ -22,6 +59,9 @@ public class TargetManager : MonoBehaviour
         ITargetable target)
     {
 
+        if (target is Component candidate && (!candidate || !candidate.gameObject.activeInHierarchy)) return;
+        if (target is Monster dead && dead.IsDead) return;
+
         if (ReferenceEquals(
                 CurrentTarget,
                 target))
@@ -31,7 +71,7 @@ public class TargetManager : MonoBehaviour
             return;
         }
 
-        if (CurrentTarget != null)
+        if (CurrentTarget != null && (!(CurrentTarget is Component oldComponent) || oldComponent))
         {
 
 
@@ -40,6 +80,7 @@ public class TargetManager : MonoBehaviour
 
         CurrentTarget =
             target;
+        if (CurrentTarget == null) TargetChanged?.Invoke(null);
 
 
 
@@ -48,7 +89,10 @@ public class TargetManager : MonoBehaviour
 
 
             CurrentTarget.Select();
+            RefreshIndicator();
 
+
+            TargetChanged?.Invoke(CurrentTarget);
 
             GameServerConnection.Instance?
                 .SendTargetSelect(
@@ -58,9 +102,11 @@ public class TargetManager : MonoBehaviour
 
     public void ClearTarget()
     {
+        LocalPlayer.Instance?.GetComponent<PlayerCombat>()?.StopAttack();
+        AttackTarget = null;
 
 
-        if (CurrentTarget != null)
+        if (CurrentTarget != null && (!(CurrentTarget is Component component) || component))
         {
             CurrentTarget.Deselect();
         }
@@ -68,6 +114,7 @@ public class TargetManager : MonoBehaviour
         CurrentTarget =
             null;
 
+        TargetChanged?.Invoke(null);
         GameServerConnection.Instance?
             .SendTargetSelect(
                 0);

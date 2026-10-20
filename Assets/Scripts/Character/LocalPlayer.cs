@@ -5,10 +5,19 @@ public class LocalPlayer : MonoBehaviour, ITargetable
     public static LocalPlayer Instance { get; private set; }
     [SerializeField]
     private PlayerNameplate playerNameplate;
-    [SerializeField]
-    private GameObject _selectionCircle;
     private Vector3 _lastPosition;
     private Quaternion _lastRotation;
+    public string GuildName { get; private set; } = string.Empty;
+    public event System.Action<string> GuildChanged;
+
+    public void SetGuildName(string guildName)
+    {
+        guildName = guildName ?? string.Empty;
+        if (GuildName == guildName) return;
+        GuildName = guildName;
+        GuildChanged?.Invoke(GuildName);
+    }
+
     public int PlayerId { get; private set; }
     public Vector3 Position => transform.position;
     public Quaternion Rotation => transform.rotation;
@@ -33,11 +42,7 @@ public class LocalPlayer : MonoBehaviour, ITargetable
         _lastPosition = transform.position;
         _lastRotation = transform.rotation;
 
-        if (_selectionCircle != null)
-        {
-            _selectionCircle.SetActive(
-                false);
-        }
+        
     }
 
     private void Update()
@@ -89,18 +94,12 @@ public class LocalPlayer : MonoBehaviour, ITargetable
     }
     public void Select()
     {
-        if (_selectionCircle != null)
-        {
-            _selectionCircle.SetActive(true);
-        }
+        OverheadTargetIndicator.SetFor(this, TargetIndicatorState.Selected);
     }
 
     public void Deselect()
     {
-        if (_selectionCircle != null)
-        {
-            _selectionCircle.SetActive(false);
-        }
+        OverheadTargetIndicator.SetFor(this, TargetIndicatorState.None);
     }
     public void SetPlayerId(
     int playerId)

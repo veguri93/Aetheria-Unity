@@ -3,6 +3,15 @@ using UnityEngine;
 
 public class PlayerNameplate : MonoBehaviour
 {
+    [SerializeField] private WorldNameplate worldNameplate;
+    [SerializeField] private Sprite guildCrest;
+
+    public void SetGuildCrest(Sprite crest)
+    {
+        guildCrest = crest;
+        if (worldNameplate && worldNameplate.TargetIndicator)
+            worldNameplate.TargetIndicator.SetGuildCrest(crest);
+    }
     [SerializeField]
     private TMP_Text nameText;
 
@@ -13,6 +22,12 @@ public class PlayerNameplate : MonoBehaviour
         string playerName,
         string title)
     {
+        if (worldNameplate)
+        {
+            worldNameplate.SetInfo(playerName, title);
+            SetGuildCrest(guildCrest);
+            return;
+        }
         nameText.text = playerName;
 
         if (string.IsNullOrWhiteSpace(title))

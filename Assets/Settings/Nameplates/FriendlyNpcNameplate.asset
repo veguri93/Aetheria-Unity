@@ -14,8 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WorldNameplateStyle
   font: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   fontMaterial: {fileID: 2100000, guid: 7b32a7dbe17a34b41b38ce7c4976eea2, type: 2}
-  fontSize: 2.4
-  color: {r: 0.93, g: 0.88, b: 0.74, a: 1}
-  verticalOffset: 0.6
-  visibilityDistance: 35
+  fontSize: 4
+  color: {r: 1, g: 1, b: 1, a: 1}
+  titleFontSize: 3
+  titleColor: {r: 0.57101303, g: 0.28622285, b: 0.9056604, a: 1}
+  titleVerticalSeparation: 0.32
+  verticalOffset: 1
+  visibilityDistance: 60
   fadeDistanceFraction: 0.2

@@ -61,6 +61,7 @@ public class PlayerCombat : MonoBehaviour
             return;
 
         _target = monster;
+        TargetManager.Instance?.SetAttackTarget(monster);
         _isAutoAttacking = true;
 
         _lastAttackDestination =
@@ -71,6 +72,7 @@ public class PlayerCombat : MonoBehaviour
 
     public void StopAttack(Vector3 destination)
     {
+        TargetManager.Instance?.ClearAttackTarget(_target);
         if (_stopRequested)
             return;
 
@@ -80,6 +82,7 @@ public class PlayerCombat : MonoBehaviour
     }
     public void StopAttack()
     {
+        TargetManager.Instance?.ClearAttackTarget(_target);
         _isAutoAttacking = false;
         _target = null;
         _nextAttackTime = 0f;

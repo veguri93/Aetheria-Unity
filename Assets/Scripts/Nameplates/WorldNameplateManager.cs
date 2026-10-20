@@ -12,14 +12,17 @@ public sealed class WorldNameplateManager : MonoBehaviour
     private readonly List<Candidate> candidates = new();
     private readonly HashSet<WorldNameplate> visible = new();
     private float nextVisibility, nextCameraLookup;
-    private struct Candidate { public WorldNameplate plate; public float distance; }
-    private static readonly System.Comparison<Candidate> Nearest = (a, b) => a.distance.CompareTo(b.distance);
+    private struct Candidate { public WorldNameplate plate; public float distance; public bool targeted; }
+    private static readonly System.Comparison<Candidate> Nearest = (a, b) =>
+        a.targeted != b.targeted ? (a.targeted ? -1 : 1) : a.distance.CompareTo(b.distance);
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetState() => plates.Clear();
     public static void Register(WorldNameplate plate) { if (!plates.Contains(plate)) plates.Add(plate); }
     public static void Unregister(WorldNameplate plate) => plates.Remove(plate);
     private void LateUpdate()
     {
+        // One unscaled GPU clock shared by the two visible arrowheads.
+        Shader.SetGlobalFloat(ArrowTimeId, Time.unscaledTime);
         if ((!viewCamera || !viewCamera.isActiveAndEnabled) && Time.unscaledTime >= nextCameraLookup)
         {
             viewCamera = Camera.main; nextCameraLookup = Time.unscaledTime + 1f;
@@ -36,6 +39,7 @@ public sealed class WorldNameplateManager : MonoBehaviour
         }
         foreach (var p in plates) if (p && p.Visible) p.UpdatePose(viewCamera);
     }
+    private static readonly int ArrowTimeId = Shader.PropertyToID("_AetheriaTargetArrowTime");
     private void UpdateVisibility()
     {
         candidates.Clear();
@@ -51,7 +55,8 @@ public sealed class WorldNameplateManager : MonoBehaviour
             if (distance >= range * range) continue;
             var screen = viewCamera.WorldToViewportPoint(p.AnchorPosition);
             if (screen.z <= 0f || screen.x < -0.05f || screen.x > 1.05f || screen.y < -0.05f || screen.y > 1.05f) continue;
-            candidates.Add(new Candidate { plate = p, distance = distance });
+            candidates.Add(new Candidate { plate = p, distance = distance,
+                targeted = p.TargetIndicator && p.TargetIndicator.State != TargetIndicatorState.None });
         }
         candidates.Sort(Nearest);
         for (int i = 0; i < Mathf.Min(candidates.Count, maximumVisibleNameplates); i++)

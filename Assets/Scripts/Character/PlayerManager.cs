@@ -76,6 +76,12 @@ public class PlayerManager : MonoBehaviour
         }
 }
 
+    public void UpdatePlayerGuild(int playerId, string guildName)
+    {
+        if (_remotePlayers.TryGetValue(playerId, out RemotePlayer player))
+            player.SetGuildName(guildName);
+    }
+
     public void UpdatePlayerTitle(
     int playerId,
     string title)
@@ -101,6 +107,8 @@ public class PlayerManager : MonoBehaviour
         }
 
 
+        if (TargetManager.Instance && ReferenceEquals(TargetManager.Instance.CurrentTarget, remotePlayer))
+            TargetManager.Instance.ClearTarget();
         Destroy(remotePlayer.gameObject);
 
         _remotePlayers.Remove(playerId);

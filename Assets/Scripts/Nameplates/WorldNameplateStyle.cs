@@ -16,13 +16,13 @@ public sealed class WorldNameplateStyle : ScriptableObject
 
     [Header("Title")]
     [Min(0.1f)]
-    public float titleFontSize = 2.6f;
+    public float titleFontSize = 2.0f;
 
     public Color titleColor =
         new Color(1f, 0.72f, 0.22f, 1f); // Lineage-like orange/gold
 
     [Min(0f)]
-    public float titleVerticalSeparation = 0.22f;
+    public float titleVerticalSeparation = 0.32f;
 
     [Header("Position And Visibility")]
     [Min(0f)]

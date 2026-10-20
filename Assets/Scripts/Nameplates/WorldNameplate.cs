@@ -5,6 +5,8 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public sealed class WorldNameplate : MonoBehaviour
 {
+    [SerializeField] private OverheadTargetIndicator targetIndicator;
+    public OverheadTargetIndicator TargetIndicator => targetIndicator;
     [SerializeField]
     private WorldNameplateStyle style;
 
@@ -84,6 +86,7 @@ public sealed class WorldNameplate : MonoBehaviour
         }
 
         SetVisible(false, 0f);
+        if (targetIndicator) targetIndicator.RefreshLayout();
 
         if (isActiveAndEnabled)
         {
@@ -166,6 +169,7 @@ public sealed class WorldNameplate : MonoBehaviour
             !string.IsNullOrWhiteSpace(label.text);
 
         Visible = visible;
+        if (targetIndicator) targetIndicator.SetVisibility(visible, alpha);
 
         if (label)
         {
@@ -209,8 +213,9 @@ public sealed class WorldNameplate : MonoBehaviour
 
         UpdateLabelPose(
             label,
-            anchor,
+            anchor + camera.transform.right * (targetIndicator ? targetIndicator.NameOffset : 0f),
             camera);
+        if (targetIndicator) targetIndicator.UpdatePose(anchor, camera.transform.rotation);
 
         if (titleLabel &&
             titleLabel != label &&
