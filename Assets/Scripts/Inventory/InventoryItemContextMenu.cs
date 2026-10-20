@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 
 public class InventoryItemContextMenu : MonoBehaviour
 {
+    public static bool IsOpen => Instance != null && Instance.isActiveAndEnabled;
     public static InventoryItemContextMenu Instance { get; private set; }
 
     [SerializeField]
@@ -28,6 +29,7 @@ public class InventoryItemContextMenu : MonoBehaviour
         ClientItemInstance item,
         RectTransform itemRect)
     {
+        InventoryUI.InterruptTooltips();
         selectedItem = item;
         openedFrame = Time.frameCount;
 
@@ -58,6 +60,7 @@ public class InventoryItemContextMenu : MonoBehaviour
 
     private void OnDropClicked()
     {
+        InventoryUI.InterruptTooltips();
         if (selectedItem == null)
         {
             Debug.LogWarning(

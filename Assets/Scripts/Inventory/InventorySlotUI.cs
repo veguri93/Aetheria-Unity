@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public class InventorySlotUI :
     MonoBehaviour,
     IPointerClickHandler,
+    IPointerDownHandler,
+    IScrollHandler,
     IBeginDragHandler,
     IDragHandler,
     IEndDragHandler,
@@ -21,6 +23,14 @@ public class InventorySlotUI :
     private TMP_Text quantityText;
 
     private ClientItemInstance item;
+
+    [SerializeField] private InventorySelectionGlow selectionGlow;
+
+    public void SetSelected(bool selected)
+    {
+        if (selectionGlow != null)
+            selectionGlow.gameObject.SetActive(selected && item != null);
+    }
 
     private GameObject dragIconObject;
     private Canvas rootCanvas;
@@ -65,6 +75,7 @@ public class InventorySlotUI :
     public void OnDrop(
         PointerEventData eventData)
     {
+        InventoryUI.InterruptTooltips();
         if (eventData.pointerDrag == null)
             return;
 
@@ -106,6 +117,7 @@ public class InventorySlotUI :
         ClientItemInstance itemInstance,
         Sprite icon)
     {
+        inventoryUI?.CancelItemHover(this);
         item =
             itemInstance;
 
@@ -125,6 +137,8 @@ public class InventorySlotUI :
 
     public void Clear()
     {
+        inventoryUI?.CancelItemHover(this);
+        SetSelected(false);
         item =
             null;
 
@@ -144,26 +158,41 @@ public class InventorySlotUI :
         if (item == null)
             return;
 
-        inventoryUI?.ShowItemTooltip(
-            item,
-            transform as RectTransform);
+        inventoryUI?.BeginItemHover(this, eventData);
     }
 
     public void OnPointerExit(
         PointerEventData eventData)
     {
-        ItemTooltipUI.Instance?.Hide();
+        inventoryUI?.EndItemHover(this, eventData);
     }
+
+    public void OnPointerDown(PointerEventData eventData) => InventoryUI.InterruptTooltips();
+
+    public void OnScroll(PointerEventData eventData)
+    {
+        InventoryUI.InterruptTooltips();
+        // Forward the wheel event now received by this slot to preserve scrolling.
+        GetComponentInParent<ScrollRect>()?.OnScroll(eventData);
+    }
+
+    private void OnDisable() => inventoryUI?.CancelItemHover(this);
 
     public void OnPointerClick(
         PointerEventData eventData)
     {
+        InventoryUI.InterruptTooltips();
         if (item == null)
+        {
+            if (eventData.button == PointerEventData.InputButton.Left)
+                inventoryUI?.ClearSelection();
             return;
+        }
 
         if (eventData.button ==
             PointerEventData.InputButton.Right)
         {
+            inventoryUI?.SelectItem(item);
             InventoryItemContextMenu.Instance?.Show(
                 item,
                 transform as RectTransform);
@@ -176,6 +205,8 @@ public class InventorySlotUI :
         {
             return;
         }
+
+        inventoryUI?.SelectItem(item);
 
         if (eventData.clickCount < 2)
             return;
@@ -191,7 +222,7 @@ public class InventorySlotUI :
     public void OnBeginDrag(
         PointerEventData eventData)
     {
-        ItemTooltipUI.Instance?.Hide();
+        InventoryUI.InterruptTooltips();
 
         if (item == null)
             return;
@@ -247,6 +278,7 @@ public class InventorySlotUI :
     public void OnEndDrag(
         PointerEventData eventData)
     {
+        InventoryUI.InterruptTooltips();
         if (dragIconObject == null)
             return;
 

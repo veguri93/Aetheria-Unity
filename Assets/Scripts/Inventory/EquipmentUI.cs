@@ -110,6 +110,7 @@ public class EquipmentUI : MonoBehaviour
     int itemId,
     RectTransform itemRect)
     {
+        InventoryUI.InterruptTooltips();
         if (_itemVisualDatabase == null)
             return;
 

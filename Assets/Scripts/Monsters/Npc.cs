@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+
+using UnityEngine;
 
 public class Npc : MonoBehaviour, ITargetable
 {
@@ -7,7 +8,8 @@ public class Npc : MonoBehaviour, ITargetable
 
     private int _objectId;
     private int _templateId;
-    private string _name;
+    private string _name = string.Empty;
+    private string _title = string.Empty;
     private NpcType _type;
 
     public int ObjectId =>
@@ -19,6 +21,9 @@ public class Npc : MonoBehaviour, ITargetable
     public string Name =>
         _name;
 
+    public string Title =>
+        _title;
+
     public NpcType Type =>
         _type;
 
@@ -26,8 +31,7 @@ public class Npc : MonoBehaviour, ITargetable
     {
         if (_selectionCircle != null)
         {
-            _selectionCircle.SetActive(
-                false);
+            _selectionCircle.SetActive(false);
         }
     }
 
@@ -35,43 +39,34 @@ public class Npc : MonoBehaviour, ITargetable
         int objectId,
         int templateId,
         string npcName,
-        NpcType npcType)
+        NpcType npcType,
+        string npcTitle = "")
     {
-        _objectId =
-            objectId;
+        _objectId = objectId;
+        _templateId = templateId;
+        _name = npcName;
+        _title = npcTitle ?? string.Empty;
+        _type = npcType;
 
-        _templateId =
-            templateId;
-
-        _name =
-            npcName;
-
-        _type =
-            npcType;
+        if (TryGetComponent<WorldNameplate>(out var nameplate))
+        {
+            nameplate.SetInfo(_name, _title);
+        }
     }
 
     public void Select()
     {
         if (_selectionCircle == null)
-        {
-
-
             return;
-        }
 
-        _selectionCircle.SetActive(
-            true);
-
+        _selectionCircle.SetActive(true);
     }
 
     public void Deselect()
     {
-
-
         if (_selectionCircle != null)
         {
-            _selectionCircle.SetActive(
-                false);
+            _selectionCircle.SetActive(false);
         }
     }
 }

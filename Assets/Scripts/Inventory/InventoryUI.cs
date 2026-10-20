@@ -1,8 +1,132 @@
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-public class InventoryUI : MonoBehaviour
+public class InventoryUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandler
 {
+    [Header("Item tooltip")]
+    [SerializeField, Min(0f)] private float tooltipHoverDelay = 1.5f;
+    private static event System.Action TooltipInterrupted;
+    private Coroutine tooltipRoutine;
+    private InventorySlotUI tooltipSlot;
+    private bool hoverNeedsMovement;
+    private Vector2 interruptedPointerPosition;
+
+    public static void InterruptTooltips()
+    {
+        TooltipInterrupted?.Invoke();
+        ItemTooltipUI.Instance?.Hide();
+    }
+
+    private void Awake()
+    {
+        foreach (var scroll in GetComponentsInChildren<ScrollRect>(true))
+            if (!scroll.TryGetComponent<InventoryTooltipScrollRelay>(out _))
+                scroll.gameObject.AddComponent<InventoryTooltipScrollRelay>();
+    }
+
+    public void BeginItemHover(InventorySlotUI slot, PointerEventData eventData)
+    {
+        // Scrolling/menu dismissal may synthesize pointer entry under a stationary cursor.
+        bool canRearm = !hoverNeedsMovement ||
+            (eventData.position - interruptedPointerPosition).sqrMagnitude > 0.25f;
+        InterruptTooltips();
+        if (!canRearm || !isActiveAndEnabled || slot.Item == null || eventData.dragging ||
+            eventData.pointerDrag != null || InventoryItemContextMenu.IsOpen)
+            return;
+        hoverNeedsMovement = false;
+        tooltipSlot = slot;
+        tooltipRoutine = StartCoroutine(WaitForItemHover(slot, slot.Item.ObjectId));
+    }
+
+    private IEnumerator WaitForItemHover(InventorySlotUI slot, int objectId)
+    {
+        yield return new WaitForSecondsRealtime(Mathf.Max(0f, tooltipHoverDelay));
+        tooltipRoutine = null;
+        if (tooltipSlot != slot || !slot || !slot.isActiveAndEnabled ||
+            slot.Item == null || slot.Item.ObjectId != objectId ||
+            !ClientInventory.TryGetItem(objectId, out var item) ||
+            item.Quantity <= 0 || !ShouldShowItem(item) || InventoryItemContextMenu.IsOpen)
+            yield break;
+        ShowItemTooltip(item, slot.transform as RectTransform);
+    }
+
+    public void CancelItemHover(InventorySlotUI slot)
+    {
+        if (tooltipSlot == slot)
+        {
+            CancelTooltip();
+            ItemTooltipUI.Instance?.Hide();
+        }
+    }
+
+    public void EndItemHover(InventorySlotUI slot, PointerEventData eventData)
+    {
+        CancelItemHover(slot);
+        // A real exit permits re-entry even at the original coordinates. An exit
+        // caused by a menu appearing under a stationary mouse does not rearm it.
+        if ((eventData.position - interruptedPointerPosition).sqrMagnitude > 0.25f)
+            hoverNeedsMovement = false;
+    }
+
+    private void CancelTooltip()
+    {
+        if (tooltipRoutine != null) StopCoroutine(tooltipRoutine);
+        tooltipRoutine = null;
+        tooltipSlot = null;
+    }
+
+    private void InterruptTooltip()
+    {
+        hoverNeedsMovement = true;
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        if (mouse != null) interruptedPointerPosition = mouse.position.ReadValue();
+        CancelTooltip();
+    }
+
+    public void OnPointerDown(PointerEventData eventData) => InterruptTooltips();
+    public int? SelectedObjectId { get; private set; }
+
+    public void SelectItem(ClientItemInstance item)
+    {
+        SelectedObjectId = item != null && ShouldShowItem(item) ? item.ObjectId : (int?)null;
+        UpdateSelectionVisuals();
+    }
+
+    public void ClearSelection()
+    {
+        SelectedObjectId = null;
+        UpdateSelectionVisuals();
+    }
+
+    private void UpdateSelectionVisuals()
+    {
+        foreach (InventorySlotUI slot in slots)
+            slot.SetSelected(slot.Item != null && slot.Item.ObjectId == SelectedObjectId);
+    }
+
+    private void LateUpdate()
+    {
+        if (tooltipSlot != null && (tooltipSlot.Item == null ||
+            !ClientInventory.TryGetItem(tooltipSlot.Item.ObjectId, out var hoverItem) ||
+            hoverItem.Quantity <= 0 || !ShouldShowItem(hoverItem)))
+            InterruptTooltips();
+        // Also handles client mutations that do not immediately refresh this window.
+        if (SelectedObjectId.HasValue &&
+            (!ClientInventory.TryGetItem(SelectedObjectId.Value, out var selected) ||
+             selected.Quantity <= 0 || !ShouldShowItem(selected)))
+            ClearSelection();
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        InterruptTooltips();
+        // Child slot/button/scrollbar handlers consume their own clicks.
+        if (eventData.button == PointerEventData.InputButton.Left)
+            ClearSelection();
+    }
     private enum InventoryView
     {
         Items,
@@ -55,6 +179,7 @@ public class InventoryUI : MonoBehaviour
 
     private void OnEnable()
     {
+        TooltipInterrupted += InterruptTooltip;
         if (slots.Count > 0)
         {
             Refresh();
@@ -79,7 +204,12 @@ public class InventoryUI : MonoBehaviour
 
     public void Refresh()
     {
+        InterruptTooltips();
         SyncItemOrder();
+        if (SelectedObjectId.HasValue &&
+            (!ClientInventory.TryGetItem(SelectedObjectId.Value, out var selected) ||
+             selected.Quantity <= 0 || !ShouldShowItem(selected)))
+            SelectedObjectId = null;
 
         foreach (InventorySlotUI slot
             in slots)
@@ -128,6 +258,7 @@ public class InventoryUI : MonoBehaviour
 
             slotIndex++;
         }
+        UpdateSelectionVisuals();
     }
 
     public void MoveItem(
@@ -269,6 +400,8 @@ public class InventoryUI : MonoBehaviour
 
     private void OnDisable()
     {
+        CancelTooltip();
+        TooltipInterrupted -= InterruptTooltip;
         InventoryItemContextMenu.Instance?.Hide();
         ItemTooltipUI.Instance?.Hide();
     }

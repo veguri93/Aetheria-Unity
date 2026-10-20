@@ -2,6 +2,7 @@
 using System.Globalization;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ItemTooltipUI : MonoBehaviour
 {
@@ -40,6 +41,12 @@ public class ItemTooltipUI : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        foreach (var graphic in tooltipRoot.GetComponentsInChildren<Graphic>(true))
+            graphic.raycastTarget = false;
+        var group = tooltipRoot.GetComponent<CanvasGroup>();
+        if (group == null) group = tooltipRoot.AddComponent<CanvasGroup>();
+        group.blocksRaycasts = false;
+        group.interactable = false;
         tooltipRoot.SetActive(false);
     }
 
@@ -47,6 +54,7 @@ public class ItemTooltipUI : MonoBehaviour
         ItemVisualDefinition definition,
         RectTransform itemRect)
     {
+        if (InventoryItemContextMenu.IsOpen) return;
         itemNameText.text =
             definition.ItemName;
 
@@ -198,13 +206,16 @@ public class ItemTooltipUI : MonoBehaviour
             ? value.Value.ToString(
                 "0.##",
                 CultureInfo.InvariantCulture)
-            : "—";
+            : "â€”";
     }
 
     public void ShowSkill(
         SkillClientData skill,
         RectTransform skillRect)
     {
+        // Skills remain immediate and cannot race a pending inventory hover.
+        InventoryUI.InterruptTooltips();
+        if (InventoryItemContextMenu.IsOpen) return;
         itemNameText.text =
             skill.DisplayName;
 

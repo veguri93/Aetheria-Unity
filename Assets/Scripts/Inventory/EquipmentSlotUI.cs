@@ -131,6 +131,7 @@ public class EquipmentSlotUI :
     public void OnPointerClick(
         PointerEventData eventData)
     {
+        InventoryUI.InterruptTooltips();
         if (!HasItem)
             return;
 
@@ -153,6 +154,8 @@ public class EquipmentSlotUI :
     public void OnPointerEnter(
     PointerEventData eventData)
     {
+        if (eventData.dragging || eventData.pointerDrag != null || InventoryItemContextMenu.IsOpen)
+            return;
         if (!HasItem)
             return;
 
@@ -167,12 +170,12 @@ public class EquipmentSlotUI :
     public void OnPointerExit(
         PointerEventData eventData)
     {
-        ItemTooltipUI.Instance?.Hide();
+        InventoryUI.InterruptTooltips();
     }
     public void OnBeginDrag(
         PointerEventData eventData)
     {
-        ItemTooltipUI.Instance?.Hide();
+        InventoryUI.InterruptTooltips();
 
         if (!HasItem)
             return;
@@ -254,6 +257,7 @@ public class EquipmentSlotUI :
     public void OnDrop(
     PointerEventData eventData)
     {
+        InventoryUI.InterruptTooltips();
         if (eventData.pointerDrag == null)
             return;
 
