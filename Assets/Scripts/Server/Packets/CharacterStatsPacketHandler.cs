@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using UnityEngine;
 
 public static class CharacterStatsPacketHandler
@@ -13,7 +13,7 @@ public static class CharacterStatsPacketHandler
         string[] parts =
             data.Split('|');
 
-        if (parts.Length != 7)
+        if (parts.Length != 7 && parts.Length != 9)
             return;
 
         if (!int.TryParse(
@@ -41,6 +41,9 @@ public static class CharacterStatsPacketHandler
             return;
         }
 
+        int currentCp = 0, maxCp = 0;
+        if (parts.Length == 9 && (!int.TryParse(parts[7], out currentCp) || !int.TryParse(parts[8], out maxCp))) return;
+
         PlayerStatsUI statsUI =
             Object.FindAnyObjectByType<PlayerStatsUI>();
 
@@ -55,5 +58,6 @@ public static class CharacterStatsPacketHandler
             magicDefense,
             attackSpeed,
             castingSpeed);
+        if (parts.Length == 9) statsUI.SetCombatPoints(currentCp, maxCp);
     }
 }

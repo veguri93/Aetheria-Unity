@@ -28,6 +28,23 @@ public sealed class WorldNameplate : MonoBehaviour
     private Vector3 fallbackAnchor;
     private bool initialized;
 
+    [Header("Player Title Marquee")]
+    [SerializeField] private PlayerTitleMarquee titleMarquee;
+    private bool titleScrolling;
+    private string actualTitle = string.Empty;
+
+    public void SetTitleScrolling(bool enabled)
+    {
+        // Only PlayerNameplate opts in; NPC and monster callers retain stationary titles.
+        titleScrolling = enabled && titleMarquee;
+        if (titleMarquee)
+        {
+            if (titleScrolling) titleMarquee.Configure(actualTitle, style);
+            titleMarquee.SetVisible(titleScrolling && Visible, 1f);
+        }
+        if (titleScrolling && titleLabel) titleLabel.enabled = false;
+    }
+
     public bool Visible { get; private set; }
 
     public WorldNameplateStyle Style => style;
@@ -57,6 +74,8 @@ public sealed class WorldNameplate : MonoBehaviour
         if (!label || !style)
             return;
 
+        this.actualTitle = actualTitle ?? string.Empty;
+
         if (!initialized)
         {
             CalculateAnchor();
@@ -85,6 +104,7 @@ public sealed class WorldNameplate : MonoBehaviour
                 this);
         }
 
+        if (titleScrolling && titleMarquee) titleMarquee.Configure(this.actualTitle, style);
         SetVisible(false, 0f);
         if (targetIndicator) targetIndicator.RefreshLayout();
 
@@ -191,7 +211,8 @@ public sealed class WorldNameplate : MonoBehaviour
                 visible &&
                 !string.IsNullOrWhiteSpace(titleLabel.text);
 
-            titleLabel.enabled = showTitle;
+            titleLabel.enabled = showTitle && !titleScrolling;
+            if (titleMarquee) titleMarquee.SetVisible(showTitle && titleScrolling, alpha);
 
             if (showTitle)
             {
@@ -217,9 +238,10 @@ public sealed class WorldNameplate : MonoBehaviour
             camera);
         if (targetIndicator) targetIndicator.UpdatePose(anchor, camera.transform.rotation);
 
+
         if (titleLabel &&
             titleLabel != label &&
-            titleLabel.enabled)
+            (titleLabel.enabled || (titleScrolling && titleMarquee && titleMarquee.IsShowing)))
         {
             Vector3 titlePosition =
                 anchor +
@@ -229,7 +251,9 @@ public sealed class WorldNameplate : MonoBehaviour
                 titleLabel,
                 titlePosition,
                 camera);
+            if (titleScrolling && titleMarquee) titleMarquee.UpdatePose(camera);
         }
+
     }
 
     private static void UpdateLabelPose(

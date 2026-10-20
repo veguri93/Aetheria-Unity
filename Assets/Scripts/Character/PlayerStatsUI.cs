@@ -11,6 +11,26 @@ public class PlayerStatsUI : MonoBehaviour
     [SerializeField]
     private TMP_Text statsText;
 
+    [Header("CP (server authoritative)")]
+    [SerializeField] private Slider cpSlider;
+    [SerializeField] private TMP_Text cpText;
+    public int CurrentCp { get; private set; }
+    public int MaxCp { get; private set; }
+
+    private void Awake()
+    {
+        // No demo/fabricated CP before the first server snapshot.
+        if (cpSlider) { cpSlider.maxValue = 1; cpSlider.SetValueWithoutNotify(0); }
+        if (cpText) cpText.text = "— / —";
+    }
+
+    public void SetCombatPoints(int current, int maximum)
+    {
+        MaxCp = Mathf.Max(0, maximum); CurrentCp = Mathf.Clamp(current, 0, MaxCp);
+        if (cpSlider) { cpSlider.maxValue = Mathf.Max(1, MaxCp); cpSlider.SetValueWithoutNotify(CurrentCp); }
+        if (cpText) cpText.text = $"{CurrentCp} / {MaxCp}";
+    }
+
     [Header("HP")]
     [SerializeField]
     private Slider hpSlider;

@@ -523,7 +523,7 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 298
   m_WholeNumbers: 0
-  m_Value: 298
+  m_Value: 112
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1393,6 +1393,7 @@ MonoBehaviour:
   titleLabel: {fileID: 5792304013826198562}
   headAnchor: {fileID: 2497860053515305094}
   extraVerticalOffset: 0
+  titleMarquee: {fileID: 0}
 --- !u!114 &960898866173522781
 MonoBehaviour:
   m_ObjectHideFlags: 0

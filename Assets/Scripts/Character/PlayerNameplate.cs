@@ -25,6 +25,10 @@ public class PlayerNameplate : MonoBehaviour
         if (worldNameplate)
         {
             worldNameplate.SetInfo(playerName, title);
+
+            // Player titles always scroll while visible.
+            worldNameplate.SetTitleScrolling(true);
+
             SetGuildCrest(guildCrest);
             return;
         }

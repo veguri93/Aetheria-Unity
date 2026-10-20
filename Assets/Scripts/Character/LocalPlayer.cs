@@ -134,6 +134,11 @@ public class LocalPlayer : MonoBehaviour, ITargetable
                 rotationY,
                 0f);
 
+        if (controller != null)
+        {
+            ResolveUndergroundSpawn(controller);
+        }
+
         if (wasEnabled)
         {
             controller.enabled = true;
@@ -157,5 +162,38 @@ public class LocalPlayer : MonoBehaviour, ITargetable
 
     }
 
+
+    // A saved server position can be below a scene surface (for example after a
+    // model/pivot change). A one-sided floor cannot stop a capsule already below it.
+    // Resolve that initial overlap once, before ordinary movement/gravity resumes.
+    private void ResolveUndergroundSpawn(CharacterController controller)
+    {
+        float scaleY = Mathf.Abs(transform.lossyScale.y);
+        float skin = controller.skinWidth * scaleY;
+        Vector3 foot = transform.TransformPoint(controller.center - Vector3.up * controller.height * .5f);
+        Vector3 probe = transform.TransformPoint(controller.center + Vector3.up *
+            Mathf.Max(0, controller.height * .5f - controller.skinWidth));
+        float distance = Mathf.Max(0, probe.y - foot.y);
+        if (distance <= .001f) return;
+
+        Physics.SyncTransforms();
+        float minimumUp = Mathf.Cos(controller.slopeLimit * Mathf.Deg2Rad);
+        float highestSurface = float.NegativeInfinity;
+        foreach (RaycastHit hit in Physics.RaycastAll(probe, Vector3.down, distance,
+                     Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            if (hit.transform.IsChildOf(transform) || hit.normal.y < minimumUp) continue;
+            // Other characters must never be mistaken for a walkable floor.
+            if (hit.collider.GetComponentInParent<ITargetable>() != null) continue;
+            highestSurface = Mathf.Max(highestSurface, hit.point.y);
+        }
+
+        if (highestSurface > foot.y + .001f)
+        {
+            Vector3 corrected = transform.position;
+            corrected.y += highestSurface - foot.y + skin;
+            transform.position = corrected;
+        }
+    }
 
 }
