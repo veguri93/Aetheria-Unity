@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -32,6 +32,9 @@ public class InventorySlotUI :
             selectionGlow.gameObject.SetActive(selected && item != null);
     }
 
+    private int draggedObjectId, draggedItemId;
+    private bool draggingItem, dropHandled;
+    private int suppressClickFrame = -1;
     private GameObject dragIconObject;
     private Canvas rootCanvas;
     private InventoryUI inventoryUI;
@@ -79,6 +82,8 @@ public class InventorySlotUI :
         if (eventData.pointerDrag == null)
             return;
 
+        eventData.pointerDrag.GetComponent<InventorySlotUI>()?.MarkDropHandled();
+
         // Equipped item dropped into Inventory.
         EquipmentSlotUI equipmentSlot =
             eventData.pointerDrag
@@ -117,6 +122,7 @@ public class InventorySlotUI :
         ClientItemInstance itemInstance,
         Sprite icon)
     {
+        CancelDrag();
         inventoryUI?.CancelItemHover(this);
         item =
             itemInstance;
@@ -137,6 +143,7 @@ public class InventorySlotUI :
 
     public void Clear()
     {
+        CancelDrag();
         inventoryUI?.CancelItemHover(this);
         SetSelected(false);
         item =
@@ -176,12 +183,13 @@ public class InventorySlotUI :
         GetComponentInParent<ScrollRect>()?.OnScroll(eventData);
     }
 
-    private void OnDisable() => inventoryUI?.CancelItemHover(this);
+    private void OnDisable() { CancelDrag(); inventoryUI?.CancelItemHover(this); }
 
     public void OnPointerClick(
         PointerEventData eventData)
     {
         InventoryUI.InterruptTooltips();
+        if (eventData.dragging || draggingItem || Time.frameCount == suppressClickFrame || InventoryUI.ItemInteractionDialogOpen) return;
         if (item == null)
         {
             if (eventData.button == PointerEventData.InputButton.Left)
@@ -193,9 +201,7 @@ public class InventorySlotUI :
             PointerEventData.InputButton.Right)
         {
             inventoryUI?.SelectItem(item);
-            InventoryItemContextMenu.Instance?.Show(
-                item,
-                transform as RectTransform);
+            InventoryUI.UseItem(item.ObjectId);
 
             return;
         }
@@ -211,12 +217,7 @@ public class InventorySlotUI :
         if (eventData.clickCount < 2)
             return;
 
-        if (GameServerConnection.Instance == null)
-            return;
-
-        GameServerConnection.Instance
-            .SendItemActionRequest(
-                item.ObjectId);
+        InventoryUI.UseItem(item.ObjectId);
     }
 
     public void OnBeginDrag(
@@ -224,11 +225,19 @@ public class InventorySlotUI :
     {
         InventoryUI.InterruptTooltips();
 
-        if (item == null)
+        if (eventData.button != PointerEventData.InputButton.Left || InventoryUI.ItemInteractionDialogOpen ||
+            item == null || !isActiveAndEnabled || !ClientInventory.TryGetItem(item.ObjectId, out var current) || current.IsEquipped)
             return;
 
         if (rootCanvas == null)
             return;
+
+        CancelDrag();
+        draggedObjectId = item.ObjectId;
+        draggedItemId = item.ItemId;
+        draggingItem = true;
+        dropHandled = false;
+        InventoryUI.BeginItemDrag(this);
 
         dragIconObject =
             new GameObject(
@@ -238,7 +247,7 @@ public class InventorySlotUI :
                 typeof(Image));
 
         dragIconObject.transform.SetParent(
-            rootCanvas.transform,
+            rootCanvas.rootCanvas.transform,
             false);
 
         dragIconObject.transform.SetAsLastSibling();
@@ -275,17 +284,25 @@ public class InventorySlotUI :
             eventData.position;
     }
 
-    public void OnEndDrag(
-        PointerEventData eventData)
+    public void MarkDropHandled() => dropHandled = true;
+    public void CancelDrag()
+    {
+        if (draggingItem) suppressClickFrame = Time.frameCount;
+        draggingItem = false;
+        draggedObjectId = draggedItemId = 0;
+        InventoryUI.EndItemDrag(this);
+        if (dragIconObject) Destroy(dragIconObject);
+        dragIconObject = null;
+    }
+    public void OnEndDrag(PointerEventData eventData)
     {
         InventoryUI.InterruptTooltips();
-        if (dragIconObject == null)
-            return;
-
-        Destroy(
-            dragIconObject);
-
-        dragIconObject =
-            null;
+        bool worldDrop = draggingItem && !dropHandled && isActiveAndEnabled &&
+            eventData.button == PointerEventData.InputButton.Left &&
+            UnityEngine.InputSystem.Keyboard.current?.escapeKey.isPressed != true &&
+            ClientInventory.TryGetItem(draggedObjectId, out var current) && current.ItemId == draggedItemId;
+        int id = draggedObjectId;
+        CancelDrag();
+        if (worldDrop) inventoryUI?.TryDropOutsideInventory(id, eventData);
     }
 }

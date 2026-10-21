@@ -1,115 +1,96 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class DropQuantityWindowUI : MonoBehaviour
 {
-    public static DropQuantityWindowUI Instance { get; private set; }
-
-    [SerializeField]
-    private TMP_InputField quantityInput;
-
-    [SerializeField]
-    private Button confirmButton;
-
-    [SerializeField]
-    private Button cancelButton;
-
-    private ClientItemInstance selectedItem;
-
+    private static DropQuantityWindowUI instance;
+    public static DropQuantityWindowUI Instance
+    {
+        get
+        {
+            if (!instance) instance = FindAnyObjectByType<DropQuantityWindowUI>(FindObjectsInactive.Include);
+            return instance;
+        }
+    }
+    private bool initialized, opening;
+    [SerializeField] private TMP_InputField quantityInput;
+    [SerializeField] private Button confirmButton;
+    [SerializeField] private Button cancelButton;
+    private int objectId, itemId;
+    private Action<int> confirmed;
+    private Action cancelled;
+    public bool IsShowingFor(int id) => isActiveAndEnabled && objectId == id;
     private void Awake()
     {
-        Instance = this;
-
+        Initialize();
+        // An inactive scene dialog can be opened before its first Awake.
+        if (!opening) Hide();
+    }
+    private void Initialize()
+    {
+        if (initialized) return;
+        initialized = true;
+        instance = this;
         confirmButton.onClick.AddListener(OnConfirmClicked);
         cancelButton.onClick.AddListener(Hide);
-
-        gameObject.SetActive(false);
     }
-
-    public void Show(ClientItemInstance item)
+    // Compatibility for existing callers: all drops now pass through inventory ownership.
+    public void Show(ClientItemInstance item) => FindAnyObjectByType<InventoryUI>()?.BeginWorldDrop(item.ObjectId);
+    public void Show(ClientItemInstance item, Action<int> onConfirm, Action onCancel)
     {
-        selectedItem = item;
-
+        Initialize();
+        Hide();
+        InventoryUI.InterruptTooltips();
+        objectId = item.ObjectId;
+        itemId = item.ItemId;
+        confirmed = onConfirm;
+        cancelled = onCancel;
         quantityInput.text = "1";
-
-
+        opening = true;
         gameObject.SetActive(true);
-
+        opening = false;
+        GetComponent<FantasyPopupPresentation>()?.Present();
         quantityInput.Select();
         quantityInput.ActivateInputField();
     }
-
     public void Hide()
     {
-        selectedItem = null;
-
+        Action cancel = cancelled;
+        cancelled = null;
+        confirmed = null;
+        objectId = itemId = 0;
         quantityInput.text = string.Empty;
-
         gameObject.SetActive(false);
+        cancel?.Invoke();
     }
-
     private void OnConfirmClicked()
     {
-        Debug.Log(
-            $"[DROP QUANTITY] Confirm clicked. " +
-            $"Input='{quantityInput.text}'");
-
-        if (selectedItem == null)
+        if (!ClientInventory.TryGetItem(objectId, out var current) || current.ItemId != itemId ||
+            current.IsEquipped || current.IsQuestItem || !current.Droppable)
+        { Hide(); return; }
+        if (!int.TryParse(quantityInput.text, out int quantity) || quantity < 1 || quantity > current.Quantity)
         {
-            Debug.LogWarning(
-                "[DROP QUANTITY] No selected item.");
-
+            Debug.LogWarning("Enter a drop quantity between 1 and " + current.Quantity + ".");
             return;
         }
-
-        if (!int.TryParse(
-                quantityInput.text,
-                out int quantity))
-        {
-            Debug.LogWarning(
-                $"[DROP QUANTITY] Invalid quantity: " +
-                $"'{quantityInput.text}'");
-
-            return;
-        }
-
-        if (quantity <= 0)
-        {
-            Debug.LogWarning(
-                $"[DROP QUANTITY] Quantity must be greater than 0. " +
-                $"Received={quantity}");
-
-            return;
-        }
-
-        if (quantity > selectedItem.Quantity)
-        {
-            Debug.LogWarning(
-                $"[DROP QUANTITY] Tried to drop too many. " +
-                $"Requested={quantity}, " +
-                $"Available={selectedItem.Quantity}");
-
-            return;
-        }
-
-        if (GameServerConnection.Instance == null)
-        {
-            Debug.LogWarning(
-                "[DROP QUANTITY] GameServerConnection.Instance is null.");
-
-            return;
-        }
-
-        Debug.Log(
-            $"[DROP QUANTITY] Sending DropItemRequest. " +
-            $"ObjectId={selectedItem.ObjectId}, " +
-            $"Quantity={quantity}");
-
-        GameServerConnection.Instance.SendDropItemRequest(
-            selectedItem.ObjectId,
-            quantity);
-
+        Action<int> action = confirmed;
+        cancelled = null;
         Hide();
+        action?.Invoke(quantity);
+    }
+    private void OnDisable()
+    {
+        Action cancel = cancelled;
+        cancelled = null;
+        confirmed = null;
+        objectId = itemId = 0;
+        cancel?.Invoke();
+    }
+    private void OnDestroy()
+    {
+        if (confirmButton) confirmButton.onClick.RemoveListener(OnConfirmClicked);
+        if (cancelButton) cancelButton.onClick.RemoveListener(Hide);
     }
 }

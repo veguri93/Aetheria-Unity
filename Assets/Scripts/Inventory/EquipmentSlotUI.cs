@@ -1,10 +1,11 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class EquipmentSlotUI :
     MonoBehaviour,
     IPointerClickHandler,
+    IPointerDownHandler,
     IBeginDragHandler,
     IDragHandler,
     IEndDragHandler,
@@ -135,26 +136,17 @@ public class EquipmentSlotUI :
         if (!HasItem)
             return;
 
-        if (eventData.button !=
-            PointerEventData.InputButton.Left)
-        {
-            return;
-        }
-
-        if (eventData.clickCount < 2)
-            return;
-
-        if (GameServerConnection.Instance == null)
-            return;
-
-        GameServerConnection.Instance
-            .SendUnequipItemRequest(
-                _objectId);
+        if (InventoryUI.ItemInteractionDialogOpen || eventData.dragging) return;
+        if (eventData.button == PointerEventData.InputButton.Right ||
+            (eventData.button == PointerEventData.InputButton.Left && eventData.clickCount >= 2))
+            UnequipItem();
     }
+    private void UnequipItem() => GameServerConnection.Instance?.SendUnequipItemRequest(_objectId);
+    public void OnPointerDown(PointerEventData eventData) => InventoryUI.InterruptTooltips();
     public void OnPointerEnter(
     PointerEventData eventData)
     {
-        if (eventData.dragging || eventData.pointerDrag != null || InventoryItemContextMenu.IsOpen)
+        if (eventData.dragging || eventData.pointerDrag != null || InventoryUI.ItemInteractionDialogOpen)
             return;
         if (!HasItem)
             return;
@@ -177,7 +169,7 @@ public class EquipmentSlotUI :
     {
         InventoryUI.InterruptTooltips();
 
-        if (!HasItem)
+        if (eventData.button != PointerEventData.InputButton.Left || InventoryUI.ItemInteractionDialogOpen || !HasItem)
             return;
 
         if (_itemIcon == null ||
@@ -267,6 +259,8 @@ public class EquipmentSlotUI :
 
         if (inventorySlot == null)
             return;
+
+        inventorySlot.MarkDropHandled();
 
         if (inventorySlot.Item == null)
             return;

@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 
 public class GuildCreateWindow : MonoBehaviour
@@ -8,12 +8,16 @@ public class GuildCreateWindow : MonoBehaviour
     [SerializeField]
     private TMP_InputField guildNameInput;
 
+    [SerializeField] private TMP_Text validationText;
+
     private int _npcObjectId;
 
     private void Awake()
     {
         Instance =
             this;
+
+        guildNameInput.onValueChanged.AddListener(ClearValidation);
 
         gameObject.SetActive(
             false);
@@ -31,12 +35,16 @@ public class GuildCreateWindow : MonoBehaviour
         gameObject.SetActive(
             true);
 
+        ClearValidation(string.Empty);
+        GetComponent<FantasyPopupPresentation>()?.Present();
+
         guildNameInput.Select();
         guildNameInput.ActivateInputField();
     }
 
     public void Hide()
     {
+        ClearValidation(string.Empty);
         gameObject.SetActive(
             false);
 
@@ -52,6 +60,8 @@ public class GuildCreateWindow : MonoBehaviour
         if (string.IsNullOrWhiteSpace(
                 guildName))
         {
+            SetValidation("Enter a guild name to continue.");
+
             Debug.LogWarning(
                 "Guild name is empty.");
 
@@ -63,11 +73,15 @@ public class GuildCreateWindow : MonoBehaviour
 
         if (connection == null)
         {
+            SetValidation("Connection is not available.");
+
             Debug.LogError(
                 "GameServerConnection is not available.");
 
             return;
         }
+
+        ClearValidation(string.Empty);
 
         connection.SendGuildCreateRequest(
             _npcObjectId,
@@ -82,5 +96,14 @@ public class GuildCreateWindow : MonoBehaviour
     public void Cancel()
     {
         Hide();
+    }
+    private void ClearValidation(string value) => SetValidation(string.Empty);
+    private void SetValidation(string message)
+    {
+        if (validationText) validationText.text = message;
+    }
+    private void OnDestroy()
+    {
+        if (guildNameInput) guildNameInput.onValueChanged.RemoveListener(ClearValidation);
     }
 }

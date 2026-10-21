@@ -22,6 +22,8 @@ public class GuildTitleWindow : MonoBehaviour
         gameObject.SetActive(
             true);
 
+        GetComponent<FantasyPopupPresentation>()?.Present();
+        titleInput.Select();
         titleInput.ActivateInputField();
     }
 

@@ -40,6 +40,9 @@ public class ItemTooltipUI : MonoBehaviour
 
     private void Awake()
     {
+        // The scene has both a Systems host and a component on the shared root.
+        // A late duplicate must not hide the first tooltip while it is opening.
+        if (Instance != null && Instance != this) { enabled = false; return; }
         Instance = this;
         foreach (var graphic in tooltipRoot.GetComponentsInChildren<Graphic>(true))
             graphic.raycastTarget = false;
@@ -54,7 +57,7 @@ public class ItemTooltipUI : MonoBehaviour
         ItemVisualDefinition definition,
         RectTransform itemRect)
     {
-        if (InventoryItemContextMenu.IsOpen) return;
+        if (InventoryUI.ItemInteractionDialogOpen || InventoryItemContextMenu.IsOpen) return;
         itemNameText.text =
             definition.ItemName;
 
@@ -265,3 +268,5 @@ public class ItemTooltipUI : MonoBehaviour
         tooltipRoot.SetActive(false);
     }
 }
+
+

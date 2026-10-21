@@ -70,7 +70,9 @@ public static class InventorySnapshotPacketHandler
                     ReadStat(parts, 7),
                     ReadStat(parts, 8),
                     ReadStat(parts, 9),
-                    ReadStat(parts, 10));
+                    ReadStat(parts, 10),
+                    ReadFlag(parts, 11),
+                    ReadFlag(parts, 12));
 
                 ClientInventory.Add(item);
             }
@@ -81,6 +83,9 @@ public static class InventorySnapshotPacketHandler
 
         inventoryUI?.Refresh();
     }
+
+    private static bool? ReadFlag(string[] parts, int index) =>
+        index < parts.Length && bool.TryParse(parts[index], out bool value) ? value : null;
 
     private static double? ReadStat(
         string[] parts,

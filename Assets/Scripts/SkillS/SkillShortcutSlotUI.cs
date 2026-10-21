@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -286,6 +286,8 @@ public class SkillShortcutSlotUI :
 
         if (dragSource == null)
             return;
+
+        (dragSource as InventorySlotUI)?.MarkDropHandled();
 
         if (dragSource.ShortcutReferenceId <= 0)
             return;

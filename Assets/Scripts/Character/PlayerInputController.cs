@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
 
@@ -54,7 +54,7 @@ public class PlayerInputController : MonoBehaviour
     private void OnLeftClick(InputAction.CallbackContext context)
     {
         // UI gets the click instead of the game world.
-        if (_pointerOverUI)
+        if (_pointerOverUI || InventoryUI.ItemDragConsumesWorldPointer || InventoryUI.ItemInteractionDialogOpen)
             return;
 
         Vector2 mousePosition =

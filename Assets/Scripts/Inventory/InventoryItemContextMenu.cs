@@ -13,133 +13,21 @@ public class InventoryItemContextMenu : MonoBehaviour
     [SerializeField]
     private Button dropButton;
 
-    private ClientItemInstance selectedItem;
-    private int openedFrame;
+
+
 
     private void Awake()
     {
         Instance = this;
 
-        dropButton.onClick.AddListener(OnDropClicked);
+
 
         gameObject.SetActive(false);
     }
 
-    public void Show(
-        ClientItemInstance item,
-        RectTransform itemRect)
-    {
-        InventoryUI.InterruptTooltips();
-        selectedItem = item;
-        openedFrame = Time.frameCount;
-
-
-        gameObject.SetActive(true);
-
-        RectTransform menuRect =
-            GetComponent<RectTransform>();
-
-        Vector3[] corners =
-            new Vector3[4];
-
-        itemRect.GetWorldCorners(corners);
-
-        Vector3 bottomCenter =
-            (corners[0] + corners[3]) / 2f;
-
-        menuRect.position =
-            bottomCenter + new Vector3(0, -5f, 0);
-    }
-
-    public void Hide()
-    {
-        selectedItem = null;
-
-        gameObject.SetActive(false);
-    }
-
-    private void OnDropClicked()
-    {
-        InventoryUI.InterruptTooltips();
-        if (selectedItem == null)
-        {
-            Debug.LogWarning(
-                "[DROP UI] Drop clicked, but no item is selected.");
-
-            return;
-        }
-
-        ClientItemInstance itemToDrop =
-            selectedItem;
-
-        Debug.Log(
-            $"[DROP UI] Drop clicked. " +
-            $"ObjectId={itemToDrop.ObjectId}, " +
-            $"ItemId={itemToDrop.ItemId}, " +
-            $"Quantity={itemToDrop.Quantity}");
-
-        Hide();
-
-        if (itemToDrop.Quantity > 1)
-        {
-            Debug.Log(
-                $"[DROP UI] Stack has {itemToDrop.Quantity} items. " +
-                $"Opening quantity window.");
-
-            DropQuantityWindowUI.Instance?.Show(
-                itemToDrop);
-
-            return;
-        }
-
-        Debug.Log(
-            $"[DROP UI] Single item. " +
-            $"Sending drop request for quantity 1.");
-
-        if (GameServerConnection.Instance == null)
-        {
-            Debug.LogWarning(
-                "[DROP UI] GameServerConnection.Instance is null.");
-
-            return;
-        }
-
-        GameServerConnection.Instance
-            .SendDropItemRequest(
-                itemToDrop.ObjectId,
-                1);
-    }
-
-    private void Update()
-    {
-        if (Time.frameCount == openedFrame)
-            return;
-
-        if (Mouse.current == null)
-            return;
-
-        bool leftClicked =
-            Mouse.current.leftButton.wasPressedThisFrame;
-
-        bool rightClicked =
-            Mouse.current.rightButton.wasPressedThisFrame;
-
-        if (!leftClicked && !rightClicked)
-            return;
-
-        RectTransform menuRect =
-            transform as RectTransform;
-
-        Vector2 mousePosition =
-            Mouse.current.position.ReadValue();
-
-        if (RectTransformUtility.RectangleContainsScreenPoint(
-                menuRect,
-                mousePosition))
-        {
-            return;
-        }
-
-        Hide();
-    }
+    // Retained only for serialized scene compatibility; inventory no longer opens this menu.
+    public void Show(ClientItemInstance item, RectTransform itemRect) => Hide();
+    public void Hide() { gameObject.SetActive(false); }
+    private void OnDropClicked() => Hide();
 }
+

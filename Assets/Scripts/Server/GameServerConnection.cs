@@ -281,7 +281,8 @@ public class GameServerConnection : MonoBehaviour
 
     public async void SendDropItemRequest(
     int objectId,
-    int quantity)
+    int quantity,
+    Vector3? position = null)
     {
         try
         {
@@ -302,6 +303,15 @@ public class GameServerConnection : MonoBehaviour
                     "|",
                     objectId,
                     quantity);
+
+            if (position.HasValue)
+            {
+                var point = position.Value;
+                if (!float.IsFinite(point.x) || !float.IsFinite(point.y) || !float.IsFinite(point.z)) return;
+                data += "|" + point.x.ToString("R", System.Globalization.CultureInfo.InvariantCulture) +
+                    "|" + point.y.ToString("R", System.Globalization.CultureInfo.InvariantCulture) +
+                    "|" + point.z.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
+            }
 
             byte[] packet =
                 BuildPacket(

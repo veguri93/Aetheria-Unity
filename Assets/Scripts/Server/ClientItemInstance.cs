@@ -1,4 +1,4 @@
-
+﻿
 public class ClientItemInstance
 {
     public int ObjectId { get; }
@@ -9,6 +9,9 @@ public class ClientItemInstance
     public string EquippedSlot { get; private set; }
 
     public bool IsQuestItem { get; }
+    public bool HasDropRules { get; }
+    public bool Stackable { get; }
+    public bool Droppable { get; }
 
     public bool IsEquipped =>
         EquippedSlot != "None";
@@ -32,13 +35,18 @@ public class ClientItemInstance
         double? physicalAttack = null,
         double? magicAttack = null,
         double? castingSpeed = null,
-        double? attackSpeed = null)
+        double? attackSpeed = null,
+        bool? stackable = null,
+        bool? droppable = null)
     {
         ObjectId = objectId;
         ItemId = itemId;
         Quantity = quantity;
         EquippedSlot = equippedSlot;
         IsQuestItem = isQuestItem;
+        HasDropRules = stackable.HasValue && droppable.HasValue;
+        Stackable = stackable ?? false;
+        Droppable = droppable ?? false;
 
         Tier = tier;
         DisplayType = displayType;
