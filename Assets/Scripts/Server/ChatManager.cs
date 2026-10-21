@@ -1,4 +1,3 @@
-using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,6 +7,8 @@ public class ChatManager : MonoBehaviour
     public static ChatManager Instance { get; private set; }
 
     private GameServerConnection _connection;
+
+    public bool IsTyping => _chatInput && _chatInput.isFocused;
 
     [Header("Chat UI")]
     [SerializeField] private ScrollRect _chatScroll;
@@ -73,6 +74,8 @@ public class ChatManager : MonoBehaviour
         if (_messagePrefab == null || _chatContent == null)
             return;
 
+        ChatHistoryScroll.BeforeAppend(_chatScroll);
+
         TMP_Text newMessage =
             Instantiate(
                 _messagePrefab,
@@ -99,7 +102,7 @@ public class ChatManager : MonoBehaviour
             }
         }
 
-        StartCoroutine(ScrollToBottom());
+
     }
 
     public void AddCombatMessage(
@@ -111,6 +114,8 @@ public class ChatManager : MonoBehaviour
 
         if (_combatMessagePrefab == null || _combatContent == null)
             return;
+
+        ChatHistoryScroll.BeforeAppend(_combatScroll);
 
         TMP_Text newMessage =
             Instantiate(
@@ -150,45 +155,10 @@ public class ChatManager : MonoBehaviour
                 break;
         }
 
-        StartCoroutine(ScrollCombatToBottom());
+
     }
 
 
-
-    private IEnumerator ScrollToBottom()
-    {
-        // Wait until Unity has finished calculating the new layout.
-        yield return null;
-
-        Canvas.ForceUpdateCanvases();
-
-        if (_chatContent != null)
-            LayoutRebuilder.ForceRebuildLayoutImmediate(
-                _chatContent);
-
-        if (_chatScroll != null)
-        {
-            _chatScroll.verticalNormalizedPosition = 0f;
-        }
-    }
-
-    private IEnumerator ScrollCombatToBottom()
-    {
-        yield return null;
-
-        Canvas.ForceUpdateCanvases();
-
-        if (_combatContent != null)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(
-                _combatContent);
-        }
-
-        if (_combatScroll != null)
-        {
-            _combatScroll.verticalNormalizedPosition = 0f;
-        }
-    }
 
     private void OnMessageSubmitted(
         string message)

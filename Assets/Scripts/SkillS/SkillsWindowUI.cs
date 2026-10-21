@@ -21,6 +21,7 @@ public class SkillsWindowUI : MonoBehaviour
     [SerializeField]
     private Transform passiveScrollView;
 
+    private bool started;
     private const int ActiveSlotCount = 50;
     private const int PassiveSlotCount = 50;
 
@@ -28,6 +29,7 @@ public class SkillsWindowUI : MonoBehaviour
     {
         ClientSkillBook.Changed +=
             PopulateSkills;
+        if (started) PopulateSkills();
     }
 
     private void OnDisable()
@@ -38,6 +40,7 @@ public class SkillsWindowUI : MonoBehaviour
 
     private void Start()
     {
+        started = true;
         PopulateSkills();
         ShowActiveSkills();
     }
@@ -90,6 +93,7 @@ public class SkillsWindowUI : MonoBehaviour
             passiveContent,
             passiveSkills,
             PassiveSlotCount);
+        GetComponent<SkillCodexPresentation>()?.Refresh();
     }
 
     public void ShowActiveSkills()
@@ -99,6 +103,7 @@ public class SkillsWindowUI : MonoBehaviour
 
         passiveScrollView.gameObject.SetActive(
             false);
+        GetComponent<SkillCodexPresentation>()?.SetPage(false);
     }
 
     public void ShowPassiveSkills()
@@ -108,6 +113,7 @@ public class SkillsWindowUI : MonoBehaviour
 
         passiveScrollView.gameObject.SetActive(
             true);
+        GetComponent<SkillCodexPresentation>()?.SetPage(true);
     }
 
     private void PopulateTable(
@@ -122,12 +128,13 @@ public class SkillsWindowUI : MonoBehaviour
              i >= 0;
              i--)
         {
+            targetContent.GetChild(i).gameObject.SetActive(false);
             Destroy(
                 targetContent.GetChild(i).gameObject);
         }
 
         for (int i = 0;
-             i < slotCount;
+             i < Mathf.Max(slotCount, skills.Count);
              i++)
         {
             SkillEntryUI entry =

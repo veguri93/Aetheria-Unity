@@ -22,6 +22,7 @@ public static class QuestSnapshotPacketHandler
             Encoding.UTF8.GetString(
                 packet.Data);
 
+        int selectedQuestId = questWindow.SelectedQuestId;
         questWindow.ClearQuests();
 
         if (string.IsNullOrWhiteSpace(
@@ -79,6 +80,8 @@ public static class QuestSnapshotPacketHandler
                 objective,
                 canAbandon);
         }
+        if (selectedQuestId > 0) questWindow.SelectQuest(selectedQuestId);
+
     }
 
     private static string DecodeText(

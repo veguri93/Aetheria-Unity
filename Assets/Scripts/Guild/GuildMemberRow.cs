@@ -12,6 +12,14 @@ public class GuildMemberRow : MonoBehaviour
     [SerializeField]
     private TMP_Text statusText;
 
+    [SerializeField] private InventorySelectionGlow selectionGlow;
+    [SerializeField] private Color onlineColor = new Color(.62f, .73f, .59f, 1);
+    [SerializeField] private Color offlineColor = new Color(.52f, .54f, .58f, 1);
+    public int CharacterId => _characterId;
+    public void SetSelected(bool selected)
+    {
+        if (selectionGlow) selectionGlow.gameObject.SetActive(selected);
+    }
     private int _characterId;
 
     private string _memberName;
@@ -31,6 +39,7 @@ public class GuildMemberRow : MonoBehaviour
             isOnline
                 ? "Online"
                 : "Offline";
+        statusText.color = isOnline ? onlineColor : offlineColor;
     }
     public void SetIdentity(
     int characterId,

@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -70,6 +70,8 @@ public class GuildInviteReceiveWindow : MonoBehaviour
 
         gameObject.SetActive(
             true);
+
+        GetComponent<FantasyPopupPresentation>()?.Present();
     }
 
     public void Accept()

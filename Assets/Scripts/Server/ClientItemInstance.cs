@@ -51,12 +51,17 @@ public class ClientItemInstance
 
     public void SetQuantity(int quantity)
     {
+        if (Quantity == quantity) return;
         Quantity = quantity;
+        ClientInventory.NotifyChanged();
     }
 
     public void SetEquippedSlot(
         string equippedSlot)
     {
+        if(EquippedSlot==equippedSlot)return;
         EquippedSlot = equippedSlot;
+        ClientInventory.NotifyChanged();
     }
 }
+

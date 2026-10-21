@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class ConfirmationWindow : MonoBehaviour
@@ -23,6 +23,8 @@ public class ConfirmationWindow : MonoBehaviour
 
         gameObject.SetActive(
             true);
+
+        GetComponent<FantasyPopupPresentation>()?.Present();
     }
 
     public void Confirm()

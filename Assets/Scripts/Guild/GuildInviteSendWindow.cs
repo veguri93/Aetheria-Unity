@@ -44,6 +44,8 @@ public class GuildInviteSendWindow : MonoBehaviour
         windowRoot.SetActive(
             true);
 
+        GetComponent<FantasyPopupPresentation>()?.Present();
+
         messageInput.Select();
         messageInput.ActivateInputField();
     }

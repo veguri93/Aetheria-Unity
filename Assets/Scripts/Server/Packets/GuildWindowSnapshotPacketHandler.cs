@@ -109,5 +109,7 @@ public static class GuildWindowSnapshotPacketHandler
             index +=
                 4;
         }
+        GuildWindow.Instance.FinishMemberRefresh();
+
     }
 }

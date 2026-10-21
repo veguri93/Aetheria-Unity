@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 
 public class PartyLootModeWindow : MonoBehaviour
@@ -38,6 +38,8 @@ public class PartyLootModeWindow : MonoBehaviour
 
         gameObject.SetActive(
             true);
+
+        GetComponent<FantasyPopupPresentation>()?.Present();
     }
 
     public void ShowByName(
@@ -60,6 +62,8 @@ public class PartyLootModeWindow : MonoBehaviour
 
         gameObject.SetActive(
             true);
+
+        GetComponent<FantasyPopupPresentation>()?.Present();
     }
 
     public void Confirm()

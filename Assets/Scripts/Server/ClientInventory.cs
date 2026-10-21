@@ -2,6 +2,8 @@ using System.Collections.Generic;
 
 public static class ClientInventory
 {
+    public static event System.Action Changed;
+    public static void NotifyChanged() => Changed?.Invoke();
     private static readonly Dictionary<int, ClientItemInstance> _items =
         new();
 
@@ -10,14 +12,14 @@ public static class ClientInventory
 
     public static void Clear()
     {
-        _items.Clear();
+        _items.Clear(); NotifyChanged();
     }
 
     public static void Add(
         ClientItemInstance item)
     {
         _items[item.ObjectId] =
-            item;
+            item; NotifyChanged();
     }
 
     public static bool TryGetItem(
@@ -54,7 +56,6 @@ public static class ClientInventory
     public static bool Remove(
         int objectId)
     {
-        return _items.Remove(
-            objectId);
+        bool removed = _items.Remove(objectId); if (removed) NotifyChanged(); return removed;
     }
 }

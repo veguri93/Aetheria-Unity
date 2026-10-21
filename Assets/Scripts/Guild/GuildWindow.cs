@@ -1,4 +1,5 @@
 ﻿using TMPro;
+using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
 
@@ -36,6 +37,8 @@ public class GuildWindow : MonoBehaviour
     [SerializeField]
     private TMP_Text warLordText;
 
+    private readonly Dictionary<int, GuildMemberRow> memberRows = new();
+    public int SelectedMemberCharacterId => _selectedMemberCharacterId;
     private int _selectedMemberCharacterId;
 
     private string _selectedMemberName;
@@ -66,6 +69,15 @@ public class GuildWindow : MonoBehaviour
         _selectedMemberName =
             memberName;
 
+        foreach (var pair in memberRows) pair.Value.SetSelected(pair.Key == characterId);
+    }
+    public void FinishMemberRefresh()
+    {
+        if (_selectedMemberCharacterId > 0 && !memberRows.ContainsKey(_selectedMemberCharacterId))
+        {
+            _selectedMemberCharacterId = 0;
+            _selectedMemberName = string.Empty;
+        }
     }
     public void OpenTitleWindow()
     {
@@ -82,9 +94,11 @@ public class GuildWindow : MonoBehaviour
                 continue;
             }
 
+            child.gameObject.SetActive(false);
             Destroy(
                 child.gameObject);
         }
+        memberRows.Clear();
     }
     public void ResetLeadership()
     {
@@ -161,6 +175,10 @@ public class GuildWindow : MonoBehaviour
             memberName,
             role,
             isOnline);
+
+        memberRows[characterId] = row;
+        row.SetSelected(characterId == _selectedMemberCharacterId);
+        if (characterId == _selectedMemberCharacterId) _selectedMemberName = memberName;
 
         Button button =
             rowObject.GetComponent<Button>();

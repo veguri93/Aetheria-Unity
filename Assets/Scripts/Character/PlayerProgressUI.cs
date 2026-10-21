@@ -5,6 +5,10 @@ public class PlayerProgressUI : MonoBehaviour
 {
     public static PlayerProgressUI Instance { get; private set; }
 
+    public string PlayerName { get; private set; } = string.Empty;
+    public int? Level { get; private set; }
+    public event System.Action Changed;
+
     [SerializeField]
     private TMP_Text nameText;
 
@@ -18,8 +22,10 @@ public class PlayerProgressUI : MonoBehaviour
 
     public void SetName(string playerName)
     {
+        PlayerName = playerName ?? string.Empty;
         nameText.text =
             playerName;
+        Changed?.Invoke();
     }
 
     public void SetProgress(
@@ -28,7 +34,9 @@ public class PlayerProgressUI : MonoBehaviour
         long currentLevelExperience,
         long nextLevelExperience)
     {
+        Level = level;
         levelText.text =
             $"Level {level}";
+        Changed?.Invoke();
     }
 }
