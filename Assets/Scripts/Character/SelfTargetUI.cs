@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class SelfTargetUI : MonoBehaviour, IPointerClickHandler
@@ -11,6 +11,8 @@ public class SelfTargetUI : MonoBehaviour, IPointerClickHandler
         {
             return;
         }
+
+        if (eventData.dragging || (TryGetComponent<PersistentUIPosition>(out var position) && position.SuppressClick)) return;
 
         if (LocalPlayer.Instance == null ||
             TargetManager.Instance == null)
