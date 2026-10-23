@@ -33,10 +33,23 @@ public class Monster : MonoBehaviour, ITargetable
 
     public string Name => _name;
 
+    public int TemplateId { get; private set; }
+    public int VisualTemplateId { get; private set; }
+    public NpcType Type { get; private set; }
+    public void SetTemplateIdentity(int templateId, int visualId, NpcType type)
+    { TemplateId = templateId; VisualTemplateId = visualId; Type = type; }
+
+    public void CopySpawnSettings(Monster source)
+    {
+        _maxHp = source._maxHp;
+        _positionSmoothing = source._positionSmoothing;
+        _rotationSmoothing = source._rotationSmoothing;
+        if (source._healthBar) _healthBar = Instantiate(source._healthBar, transform, false);
+    }
     private void Awake()
     {
         _animator =
-            GetComponent<Animator>();
+            GetComponentInChildren<Animator>(true);
 
         _ai =
             GetComponent<MonsterAI>();

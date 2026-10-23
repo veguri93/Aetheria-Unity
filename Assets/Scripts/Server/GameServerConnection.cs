@@ -7,6 +7,17 @@ public class GameServerConnection : MonoBehaviour
     public static GameServerConnection Instance { get; private set; }
 
     private TcpClient _client;
+    public bool IsConnected => _client != null && _client.Connected;
+    public async void SendNpcDialogueAction(int npcId, string token, string action)
+    {
+        try
+        {
+            if (!IsConnected) return;
+            string encoded = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(action));
+            await _client.GetStream().WriteAsync(BuildPacket(49, npcId + "|" + token + "|" + encoded));
+        }
+        catch (System.Exception ex) { Debug.LogWarning("NPC action failed: " + ex.Message); }
+    }
 
     private void Awake()
     {
@@ -47,6 +58,9 @@ public class GameServerConnection : MonoBehaviour
 
         catch (System.Exception ex)
         {
+            NpcHtmlWindow.Instance?.Hide();
+            _client?.Close();
+            MerchantPurchaseState.Disconnected();
             Debug.LogException(ex);
         }
 
@@ -473,11 +487,13 @@ public class GameServerConnection : MonoBehaviour
     int entryId,
     int quantity)
     {
+        if (!MerchantPurchaseState.Begin(out long requestId)) return;
         try
         {
             if (_client == null ||
                 !_client.Connected)
             {
+                MerchantPurchaseState.Complete(requestId, false);
                 return;
             }
 
@@ -486,6 +502,7 @@ public class GameServerConnection : MonoBehaviour
                 entryId <= 0 ||
                 quantity <= 0)
             {
+                MerchantPurchaseState.Complete(requestId, false);
                 return;
             }
 
@@ -495,7 +512,8 @@ public class GameServerConnection : MonoBehaviour
                     npcObjectId,
                     multiSellId,
                     entryId,
-                    quantity);
+                    quantity,
+                    requestId);
 
             byte[] packet =
                 BuildPacket(
@@ -509,6 +527,7 @@ public class GameServerConnection : MonoBehaviour
         }
         catch (System.Exception ex)
         {
+            MerchantPurchaseState.Complete(requestId, false);
             Debug.LogError(
                 $"Failed to send multisell buy request: " +
                 $"{ex.Message}");
@@ -570,8 +589,11 @@ public class GameServerConnection : MonoBehaviour
             if (objectId <= 0)
                 return;
 
-            string data =
-                objectId.ToString();
+            var window = NpcHtmlWindow.Instance;
+            string requestId = window ? window.Begin(objectId) : null;
+            if (string.IsNullOrEmpty(requestId)) { Debug.LogError("[NPC dialogue] Cannot send interaction: window unavailable or invalid."); return; }
+            string data = objectId + "|" + requestId;
+            NpcHtmlWindow.Trace("Sending packet 42 npc=" + objectId);
 
             byte[] packet =
                 BuildPacket(
@@ -617,46 +639,6 @@ public class GameServerConnection : MonoBehaviour
         {
             Debug.LogError(
                 $"Failed to send target selection: " +
-                $"{ex.Message}");
-        }
-    }
-    public async void SendNpcHtmlPageRequest(
-    int npcObjectId,
-    int pageId)
-    {
-        try
-        {
-            if (_client == null ||
-                !_client.Connected)
-            {
-                return;
-            }
-
-            if (npcObjectId <= 0 ||
-                pageId < 0)
-            {
-                return;
-            }
-
-            string data =
-                string.Join(
-                    "|",
-                    npcObjectId,
-                    pageId);
-
-            byte[] packet =
-                BuildPacket(
-                    49,
-                    data);
-
-            await _client
-                .GetStream()
-                .WriteAsync(packet);
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError(
-                $"Failed to send NPC HTML page request: " +
                 $"{ex.Message}");
         }
     }

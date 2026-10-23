@@ -14,7 +14,9 @@ public class PlayerInteraction : MonoBehaviour
     private WorldItemDrop pendingPickup;
 
     private const float PickupRange = 2f;
+    private Npc pendingNpcInteraction;
 
+    private const float NpcInteractionRange = 2.2f;
     private void Awake()
     {
         _movement =
@@ -30,6 +32,9 @@ public class PlayerInteraction : MonoBehaviour
     private void Update()
     {
         HandleShortcutHotkeys();
+
+        HandlePendingNpcInteraction();
+
         if (pendingPickup == null)
             return;
 
@@ -41,8 +46,7 @@ public class PlayerInteraction : MonoBehaviour
         if (distance > PickupRange)
             return;
 
-        TryPickup(
-            pendingPickup);
+        TryPickup(pendingPickup);
     }
 
     private void HandleShortcutHotkeys()
@@ -182,6 +186,47 @@ public class PlayerInteraction : MonoBehaviour
                 }
         }
     }
+
+    private void HandlePendingNpcInteraction()
+    {
+        if (pendingNpcInteraction == null)
+            return;
+
+        Npc npc = pendingNpcInteraction;
+
+        // NPC disappeared or was disabled.
+        if (!npc.gameObject.activeInHierarchy)
+        {
+            pendingNpcInteraction = null;
+            return;
+        }
+
+        // Player selected a different target.
+        if (TargetManager.Instance == null ||
+            !ReferenceEquals(
+                TargetManager.Instance.CurrentTarget,
+                npc))
+        {
+            pendingNpcInteraction = null;
+            return;
+        }
+
+        float distance = Vector3.Distance(
+            transform.position,
+            npc.transform.position);
+
+        if (distance > NpcInteractionRange)
+            return;
+
+        // Close enough! Stop and talk.
+        pendingNpcInteraction = null;
+
+        _movement.Stop();
+
+        GameServerConnection.Instance?
+            .SendNpcInteractRequest(npc.ObjectId);
+    }
+
     public void ActivateSkillFromWindow(
     int skillId)
     {
@@ -221,6 +266,7 @@ public class PlayerInteraction : MonoBehaviour
     public void OnGroundClicked(
         Vector3 position)
     {
+        pendingNpcInteraction = null;
         pendingPickup = null;
 
         if (_combat.IsAttackLocked)
@@ -240,6 +286,7 @@ public class PlayerInteraction : MonoBehaviour
     public void OnMonsterClicked(
         Monster monster)
     {
+        pendingNpcInteraction = null;
         pendingPickup = null;
 
         if (TargetManager.Instance == null)
@@ -262,6 +309,8 @@ public class PlayerInteraction : MonoBehaviour
     public void OnWorldItemClicked(
         WorldItemDrop worldItem)
     {
+
+        pendingNpcInteraction = null;
         if (worldItem == null)
             return;
 
@@ -312,39 +361,53 @@ public class PlayerInteraction : MonoBehaviour
             .SendPickupItemRequest(
                 objectId);
     }
-    public void OnNpcClicked(
-       Npc npc)
+    public void OnNpcClicked(Npc npc)
     {
-
-
         if (npc == null)
             return;
 
-        pendingPickup =
-            null;
+        pendingPickup = null;
+        pendingNpcInteraction = null;
 
         _combat.StopAttack();
 
         if (TargetManager.Instance == null)
             return;
 
+        // First click selects the NPC.
         if (!ReferenceEquals(
                 TargetManager.Instance.CurrentTarget,
                 npc))
         {
-            TargetManager.Instance.SetTarget(
-                npc);
+            TargetManager.Instance.SetTarget(npc);
+            return;
+        }
+
+        float distance = Vector3.Distance(
+            transform.position,
+            npc.transform.position);
+
+        // Already close enough: talk immediately.
+        if (distance <= NpcInteractionRange)
+        {
+            _movement.Stop();
+
+            GameServerConnection.Instance?
+                .SendNpcInteractRequest(npc.ObjectId);
 
             return;
         }
 
-        GameServerConnection.Instance?
-            .SendNpcInteractRequest(
-                npc.ObjectId);
+        // Too far away: approach NPC automatically.
+        pendingNpcInteraction = npc;
+
+        _movement.MoveTo(npc.transform.position);
     }
+
     public void OnRemotePlayerClicked(
     RemotePlayer remotePlayer)
     {
+        pendingNpcInteraction = null;
         if (remotePlayer == null)
             return;
 

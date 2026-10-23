@@ -10,5 +10,6 @@
 
     Guard = 6,
     QuestNpc = 7,
-    Citizen = 8
+    Citizen = 8,
+    GuildMaster = 9
 }

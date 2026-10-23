@@ -40,6 +40,18 @@ public sealed class OverheadTargetIndicator : MonoBehaviour
             indicator.SetState(state);
     }
 
+    public static OverheadTargetIndicator AddPresentation(GameObject entity, OverheadTargetIndicator source, WorldNameplate plate)
+    {
+        var target = entity.AddComponent<OverheadTargetIndicator>();
+        target.nameplate = plate;
+        if (source.leftArrow) target.leftArrow = Instantiate(source.leftArrow, entity.transform, false);
+        if (source.rightArrow) target.rightArrow = Instantiate(source.rightArrow, entity.transform, false);
+        if (source.crestRenderer) target.crestRenderer = Instantiate(source.crestRenderer, entity.transform, false);
+        target.selectedMaterial = source.selectedMaterial; target.hostileMaterial = source.hostileMaterial;
+        target.arrowPadding = source.arrowPadding; target.crestGap = source.crestGap;
+        target.crestHeight = source.crestHeight; target.arrowSizeMultiplier = source.arrowSizeMultiplier;
+        return target;
+    }
     private void Awake()
     {
         if (!nameplate) nameplate = GetComponent<WorldNameplate>();

@@ -165,6 +165,10 @@ public static class ClientPacketHandler
                     packet);
                 break;
 
+            case 87:
+                MerchantPurchaseState.Handle(System.Text.Encoding.UTF8.GetString(packet.Data));
+                break;
+
             case 45:
                 MultiSellListPacketHandler.Handle(
                     packet);

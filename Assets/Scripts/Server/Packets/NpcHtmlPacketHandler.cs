@@ -1,64 +1,21 @@
-﻿using System.Text;
+using System;
+using System.Text;
 using UnityEngine;
-
 public static class NpcHtmlPacketHandler
 {
-    public static void Handle(
-        ClientPacket packet)
+    public static void Handle(ClientPacket packet)
     {
-        string data =
-            Encoding.UTF8.GetString(
-                packet.Data);
-
-        string[] parts =
-            data.Split(
-                '|',
-                3);
-
-        if (parts.Length != 3)
-            return;
-
-        if (!int.TryParse(
-                parts[0],
-                out int objectId) ||
-            !int.TryParse(
-                parts[1],
-                out int templateId))
-        {
-            return;
-        }
-
-        string html;
-
         try
         {
-            byte[] htmlBytes =
-                System.Convert.FromBase64String(
-                    parts[2]);
-
-            html =
-                Encoding.UTF8.GetString(
-                    htmlBytes);
+            var parts = Encoding.UTF8.GetString(packet.Data).Split('|');
+            NpcHtmlWindow.Trace("Received packet 43 fields=" + parts.Length);
+            if (parts.Length != 9) { Debug.LogWarning("NPC dialogue requires the updated GameServer."); return; }
+            var window = NpcHtmlWindow.Instance;
+            if (!window) { Debug.LogError("[NPC dialogue] No NPC window in the loaded scene."); return; }
+            window.Receive(parts, Encoding.UTF8.GetString(Convert.FromBase64String(parts[2])));
         }
-        catch
-        {
-            Debug.LogWarning(
-                $"Invalid NPC HTML packet for NPC {templateId}.");
-
-            return;
-        }
-
-        if (NpcHtmlWindow.Instance == null)
-        {
-            Debug.LogWarning(
-                "NpcHtmlWindow instance was not found.");
-
-            return;
-        }
-
-        NpcHtmlWindow.Instance.Show(
-            objectId,
-            templateId,
-            html);
+        catch (FormatException) { Debug.LogWarning("[NPC dialogue] Malformed packet 43."); }
+        // A presentation failure must not escape into the network receive loop and disconnect gameplay.
+        catch (Exception ex) { Debug.LogError("[NPC dialogue] Rendering packet 43 failed: " + ex); }
     }
 }

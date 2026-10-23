@@ -46,9 +46,9 @@ public class MultiSellWindow : MonoBehaviour
         Canvas.ForceUpdateCanvases();if(_scroll){_scroll.StopMovement();_scroll.verticalNormalizedPosition=1;}
     }
     public void Hide(){ClearSelection();gameObject.SetActive(false);}
-    public void BuyEntry(int entryId)
+    public void BuyEntry(int entryId, int quantity=1)
     {
         if(!isActiveAndEnabled||SelectedOffer==null||SelectedOffer.EntryId!=entryId||_npcObjectId<=0||_multiSellId<=0)return;
-        InventoryUI.InterruptTooltips();GameServerConnection.Instance?.SendMultiSellBuyRequest(_npcObjectId,_multiSellId,entryId,1);
+        InventoryUI.InterruptTooltips();GameServerConnection.Instance?.SendMultiSellBuyRequest(_npcObjectId,_multiSellId,entryId,quantity);
     }
 }

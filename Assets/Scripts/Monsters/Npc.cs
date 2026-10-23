@@ -6,6 +6,7 @@ public class Npc : MonoBehaviour, ITargetable
 
     private int _objectId;
     private int _templateId;
+    public int VisualTemplateId { get; private set; }
     private string _name = string.Empty;
     private string _title = string.Empty;
     private NpcType _type;
@@ -35,10 +36,12 @@ public class Npc : MonoBehaviour, ITargetable
         int templateId,
         string npcName,
         NpcType npcType,
-        string npcTitle = "")
+        string npcTitle = "",
+        int visualTemplateId = 0)
     {
         _objectId = objectId;
         _templateId = templateId;
+        VisualTemplateId = visualTemplateId > 0 ? visualTemplateId : templateId;
         _name = npcName;
         _title = npcTitle ?? string.Empty;
         _type = npcType;

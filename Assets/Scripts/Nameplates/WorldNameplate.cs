@@ -114,6 +114,18 @@ public sealed class WorldNameplate : MonoBehaviour
         }
     }
 
+    // Presentation is selected by entity behavior, never inherited from an unrelated appearance.
+    public static WorldNameplate AddPresentation(GameObject entity, WorldNameplate source)
+    {
+        var plate = entity.AddComponent<WorldNameplate>();
+        plate.style = source.style;
+        plate.extraVerticalOffset = source.extraVerticalOffset;
+        if (source.label) plate.label = Instantiate(source.label, entity.transform, false);
+        if (source.titleLabel) plate.titleLabel = Instantiate(source.titleLabel, entity.transform, false);
+        // A source model's head bone is not valid for a different skeleton; recalculate model bounds.
+        if (source.targetIndicator) plate.targetIndicator = OverheadTargetIndicator.AddPresentation(entity, source.targetIndicator, plate);
+        return plate;
+    }
     private void CalculateAnchor()
     {
         var renderers =

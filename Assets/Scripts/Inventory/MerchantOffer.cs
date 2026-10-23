@@ -15,6 +15,7 @@ public sealed class MerchantOffer
     public Sprite Icon;
     public string Name, Description, AdditionalProducts;
     public MerchantItemMetadata Metadata = new MerchantItemMetadata();
+    public readonly List<PurchaseCostData> Products = new List<PurchaseCostData>();
     public readonly List<PurchaseCostData> Costs = new List<PurchaseCostData>();
     public static List<MerchantOffer> Parse(string wire, ItemVisualDatabase database)
     {
@@ -34,7 +35,7 @@ public sealed class MerchantOffer
             }
             if(!string.IsNullOrEmpty(offer.Metadata.name))offer.Name=offer.Metadata.name;
             if(string.IsNullOrEmpty(offer.Name))offer.Name="Item #"+item;
-            if(count>1)offer.Name+=" ×"+count;
+            offer.Products.Add(new PurchaseCostData(offer.Icon,count,item,offer.Name));
             bool valid=true;
             foreach(var ingredient in p[1].Split(','))
             {
@@ -49,6 +50,7 @@ public sealed class MerchantOffer
             {
                 var extra=products[i].Split(':');if(extra.Length!=2||!int.TryParse(extra[0],out int extraId)||!int.TryParse(extra[1],out int extraCount)||extraId<=0||extraCount<=0){valid=false;break;}
                 string name=database&&database.TryGet(extraId,out var v)?v.ItemName:"Item #"+extraId;
+                offer.Products.Add(new PurchaseCostData(database&&database.TryGet(extraId,out var ev)?ev.Icon:null,extraCount,extraId,name));
                 offer.AdditionalProducts+="\n"+name+" ×"+extraCount;
             }
             if(valid&&offer.Costs.Count>0)offers.Add(offer);

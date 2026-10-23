@@ -131,4 +131,27 @@ public class PlayerManager : MonoBehaviour
             rotationY);
     }
 
+    public bool TryGetPlayerByName(
+    string playerName,
+    out RemotePlayer player)
+    {
+        foreach (RemotePlayer remote in _remotePlayers.Values)
+        {
+            if (remote == null)
+                continue;
+
+            if (string.Equals(
+                    remote.PlayerName,
+                    playerName,
+                    System.StringComparison.OrdinalIgnoreCase))
+            {
+                player = remote;
+                return true;
+            }
+        }
+
+        player = null;
+        return false;
+    }
+
 }

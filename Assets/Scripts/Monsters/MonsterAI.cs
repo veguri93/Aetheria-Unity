@@ -25,13 +25,19 @@ public class MonsterAI : MonoBehaviour
 
     private LocalPlayer _aggroTarget;
 
+    public void CopySpawnSettings(MonsterAI source)
+    {
+        _patrolRadius = source._patrolRadius; _minWaitTime = source._minWaitTime;
+        _maxWaitTime = source._maxWaitTime; _moveSpeed = source._moveSpeed;
+        _rotationSpeed = source._rotationSpeed; _attackRange = source._attackRange;
+    }
     private void Awake()
     {
         _monster =
             GetComponent<Monster>();
 
         _animator =
-            GetComponent<Animator>();
+            GetComponentInChildren<Animator>(true);
 
         _spawnPosition =
             transform.position;

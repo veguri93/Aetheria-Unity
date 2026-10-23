@@ -8,7 +8,7 @@ public class MonsterAttackStateBehaviour : StateMachineBehaviour
         int layerIndex)
     {
         MonsterAI ai =
-            animator.GetComponent<MonsterAI>();
+            animator.GetComponentInParent<MonsterAI>();
 
         if (ai != null)
         {
