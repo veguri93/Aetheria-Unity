@@ -61,6 +61,7 @@ public class GameServerConnection : MonoBehaviour
             NpcHtmlWindow.Instance?.Hide();
             _client?.Close();
             MerchantPurchaseState.Disconnected();
+            NotifyAttackConnectionLost();
             Debug.LogException(ex);
         }
 
@@ -171,20 +172,19 @@ public class GameServerConnection : MonoBehaviour
                 $"Failed to send hello: {ex.Message}");
         }
     }
-    public async void SendAttackRequest(int monsterId)
+
+    public async void SendAttackRequest(int monsterId, long requestId)
     {
         try
         {
             if (_client == null || !_client.Connected)
+            {
+                NotifyAttackConnectionLost();
                 return;
-
-            string data =
-                monsterId.ToString();
+            }
 
             byte[] packet =
-                BuildPacket(
-                    11,
-                    data);
+                BuildPacket(11, $"{requestId}|{monsterId}");
 
             await _client.GetStream().WriteAsync(packet);
         }
@@ -192,8 +192,33 @@ public class GameServerConnection : MonoBehaviour
         {
             Debug.LogError(
                 $"Failed to send attack request: {ex.Message}");
+
+            NotifyAttackConnectionLost();
         }
     }
+
+    public async void SendAttackCancel(long requestId)
+    {
+        try
+        {
+            if (_client == null || !_client.Connected) return;
+            await _client.GetStream().WriteAsync(BuildPacket(89, requestId.ToString()));
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"Failed to cancel attack: {ex.Message}");
+            _client?.Close();
+            NotifyAttackConnectionLost();
+        }
+    }
+
+    private void NotifyAttackConnectionLost()
+    {
+        LocalPlayer.Instance?
+            .GetComponent<PlayerCombat>()?
+            .OnAttackConnectionLost();
+    }
+
 
     public async void SendRespawnRequest(
     string destination)

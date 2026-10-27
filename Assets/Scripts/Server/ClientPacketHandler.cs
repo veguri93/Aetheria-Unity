@@ -258,6 +258,10 @@ public static class ClientPacketHandler
                 PlayerGuildChangedPacketHandler.Handle(packet);
                 break;
 
+            case 88:
+                AttackResultPacketHandler.Handle(packet);
+                break;
+
             default:
                 Debug.LogWarning(
                     $"Unknown packet type: {packet.Type}");

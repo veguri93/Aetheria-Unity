@@ -100,9 +100,11 @@ public class TargetManager : MonoBehaviour
         }
     }
 
-    public void ClearTarget()
+    public void ClearTarget() => ClearTarget(true);
+
+    public void ClearTarget(bool stopCombat)
     {
-        LocalPlayer.Instance?.GetComponent<PlayerCombat>()?.StopAttack();
+        if (stopCombat) LocalPlayer.Instance?.GetComponent<PlayerCombat>()?.StopAttack();
         AttackTarget = null;
 
 

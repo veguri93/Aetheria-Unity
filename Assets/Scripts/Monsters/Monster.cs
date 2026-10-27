@@ -260,15 +260,16 @@ _serverTargetRotation);
     private void OnDisable()
     {
         if (TargetManager.Instance && ReferenceEquals(TargetManager.Instance.CurrentTarget, this))
-            TargetManager.Instance.ClearTarget();
+            TargetManager.Instance.ClearTarget(false);
     }
 
     private void Die()
     {
+        LocalPlayer.Instance?.GetComponent<PlayerCombat>()?.OnTargetUnavailable(this);
         _isDead =
             true;
         if (TargetManager.Instance && ReferenceEquals(TargetManager.Instance.CurrentTarget, this))
-            TargetManager.Instance.ClearTarget();
+            TargetManager.Instance.ClearTarget(false);
         else TargetManager.Instance?.ClearAttackTarget(this);
 
         _hasServerMovementTarget =
@@ -335,6 +336,7 @@ Quaternion.Euler(
 
     public void DespawnFromServer()
     {
+        LocalPlayer.Instance?.GetComponent<PlayerCombat>()?.OnTargetUnavailable(this);
         _hasServerMovementTarget =
             false;
 
@@ -343,7 +345,7 @@ Quaternion.Euler(
                 TargetManager.Instance.CurrentTarget,
                 this))
         {
-            TargetManager.Instance.ClearTarget();
+            TargetManager.Instance.ClearTarget(false);
         }
 
         PlayerCombat combat =
@@ -352,7 +354,7 @@ Quaternion.Euler(
 
         if (combat != null)
         {
-            combat.StopAttack();
+            combat.OnTargetUnavailable(this);
         }
 
         gameObject.SetActive(
