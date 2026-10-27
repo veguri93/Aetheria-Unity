@@ -59,7 +59,7 @@ public static class ShortcutSnapshotPacketHandler
                 continue;
 
             if (slot < 1 ||
-                slot > 12)
+                slot > SkillShortcutBarUI.SlotCount)
             {
                 continue;
             }

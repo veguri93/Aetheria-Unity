@@ -17,7 +17,7 @@ MonoBehaviour:
     itemName: Iron Blade
     type: Sword
     description: Legendary Iron Sword, Made By Elders In Mountains From Dying Star.
-    icon: {fileID: 21300000, guid: d8ba656dbb8c82f44ae96238e41b78f5, type: 3}
+    icon: {fileID: 21300000, guid: 91b87c60ebcd6b542932621a45696dde, type: 3}
     prefab: {fileID: 919132149155446097, guid: d50dabd79a8a366498d9815bbb9e5370, type: 3}
     groundPosition: {x: 0, y: 3, z: 0}
     groundRotation: {x: 180, y: 0, z: 0}

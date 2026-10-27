@@ -156,9 +156,10 @@ public class SkillShortcutSlotUI :
         if (keyText != null)
         {
             keyText.text =
-                $"F{number}";
+                number <= 12 ? $"F{number}" : "";
         }
 
+        ShortcutSlotFeedback.Apply(this, icon, cooldownOverlay, keyText);
         ClearShortcut();
     }
     private void UpdateToggleVisual()
@@ -365,6 +366,7 @@ public class SkillShortcutSlotUI :
     public void OnPointerClick(
         PointerEventData eventData)
     {
+        if (eventData.dragging || dragIconObject != null) return;
         if (eventData.button !=
             PointerEventData.InputButton.Left)
         {

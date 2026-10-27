@@ -1,0 +1,265 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2921853762554843894
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7838545782587682812}
+  - component: {fileID: 1338217813576089924}
+  - component: {fileID: 5690095911982823352}
+  m_Layer: 0
+  m_Name: Aetheria_Sunspire_Bow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7838545782587682812
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2921853762554843894}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2220539396387340699}
+  - {fileID: 6715399260850881376}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1338217813576089924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2921853762554843894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a1357960d70f27418bbdff6747367ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Aetheria.Weapons.AetheriaBowStringDriver
+  drawControl: {fileID: 3063685866345346665}
+  restLocalPosition: {x: -0.00234, y: 0, z: 0}
+  restCaptured: 1
+  drawingHandTarget: {fileID: 0}
+  handLocalOffset: {x: 0, y: 0, z: 0}
+  drawAmount: 0
+  maximumDraw: 0.32
+  releaseDuration: 0.16
+  followHand: 0
+--- !u!205 &5690095911982823352
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2921853762554843894}
+  serializedVersion: 3
+  m_LocalReferencePoint: {x: -0.06544551, y: 0, z: 0.004554808}
+  m_Size: 1.8282945
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.25
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 8429281565213188877}
+  - screenRelativeHeight: 0
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 5582995487649167375}
+  m_Enabled: 1
+  m_GlobalIlluminationLOD: 0
+--- !u!1001 &1826853608743822960
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7838545782587682812}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -3491992262570226869, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_AABB.m_Extent.x
+      value: 0.5000115
+      objectReference: {fileID: 0}
+    - target: {fileID: -3491992262570226869, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_AABB.m_Extent.y
+      value: 0.50819
+      objectReference: {fileID: 0}
+    - target: {fileID: -3491992262570226869, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_AABB.m_Extent.z
+      value: 0.50000995
+      objectReference: {fileID: 0}
+    - target: {fileID: -3491992262570226869, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_UpdateWhenOffscreen
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3491992262570226869, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 862a8377920ab4f4296e2fbaf9b4f9eb, type: 2}
+    - target: {fileID: -1323887583556074115, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_AABB.m_Extent.x
+      value: 0.5019776
+      objectReference: {fileID: 0}
+    - target: {fileID: -1323887583556074115, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_AABB.m_Extent.y
+      value: 0.50914145
+      objectReference: {fileID: 0}
+    - target: {fileID: -1323887583556074115, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_AABB.m_Extent.z
+      value: 0.50039655
+      objectReference: {fileID: 0}
+    - target: {fileID: -1323887583556074115, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_UpdateWhenOffscreen
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1323887583556074115, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 862a8377920ab4f4296e2fbaf9b4f9eb, type: 2}
+    - target: {fileID: 919132149155446097, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+      propertyPath: m_Name
+      value: Aetheria_Sunspire_Bow
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+--- !u!4 &2220539396387340699 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+  m_PrefabInstance: {fileID: 1826853608743822960}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &3063685866345346665 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -5485894804557082599, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+  m_PrefabInstance: {fileID: 1826853608743822960}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &8429281565213188877 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -1323887583556074115, guid: 73474f4d2205ea148beaad32982cd612, type: 3}
+  m_PrefabInstance: {fileID: 1826853608743822960}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &6537922024865358987
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7838545782587682812}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: dac58f140dd1f9e4f9299033957e68fc, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: dac58f140dd1f9e4f9299033957e68fc, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: dac58f140dd1f9e4f9299033957e68fc, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: dac58f140dd1f9e4f9299033957e68fc, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: dac58f140dd1f9e4f9299033957e68fc, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: dac58f140dd1f9e4f9299033957e68fc, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: dac58f140dd1f9e4f9299033957e68fc, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: dac58f140dd1f9e4f9299033957e68fc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: dac58f140dd1f9e4f9299033957e68fc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: dac58f140dd1f9e4f9299033957e68fc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: dac58f140dd1f9e4f9299033957e68fc, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 862a8377920ab4f4296e2fbaf9b4f9eb, type: 2}
+    - target: {fileID: 919132149155446097, guid: dac58f140dd1f9e4f9299033957e68fc, type: 3}
+      propertyPath: m_Name
+      value: Aetheria_Sunspire_Bow_Body_LOD1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: dac58f140dd1f9e4f9299033957e68fc, type: 3}
+--- !u!23 &5582995487649167375 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: dac58f140dd1f9e4f9299033957e68fc, type: 3}
+  m_PrefabInstance: {fileID: 6537922024865358987}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &6715399260850881376 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: dac58f140dd1f9e4f9299033957e68fc, type: 3}
+  m_PrefabInstance: {fileID: 6537922024865358987}
+  m_PrefabAsset: {fileID: 0}

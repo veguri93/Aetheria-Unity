@@ -18,7 +18,7 @@ public class SkillShortcutBarUI : MonoBehaviour
     private readonly List<SkillShortcutSlotUI> slots =
         new();
 
-    private const int SlotCount = 12;
+    public const int SlotCount = 36;
 
     private void Start()
     {
@@ -41,6 +41,13 @@ public class SkillShortcutBarUI : MonoBehaviour
 
             slot.Initialize(
                 i);
+
+            // Stable IDs 1–12 stay on the original, keyboard-controlled bottom row.
+            var rect = (RectTransform)slot.transform;
+            rect.anchorMin = rect.anchorMax = new Vector2(0, 0);
+            rect.pivot = Vector2.zero;
+            rect.sizeDelta = new Vector2(40, 40);
+            rect.anchoredPosition = new Vector2(9 + ((i - 1) % 12) * 44, 9 + ((i - 1) / 12) * 44);
 
             slots.Add(
                 slot);
