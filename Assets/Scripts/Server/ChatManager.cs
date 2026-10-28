@@ -34,6 +34,17 @@ public class ChatManager : MonoBehaviour
     [SerializeField] private Color _globalChatColor = new Color(1f, 0.5f, 0.05f);
     [SerializeField] private Color _normalCombatColor = Color.white;
 
+    [Header("System Message Category Colors")]
+    [SerializeField] private Color _systemInfoColor = new Color32(201, 205, 212, 255);
+    [SerializeField] private Color _systemDamageColor = new Color32(240, 199, 94, 255);
+    [SerializeField] private Color _systemMissColor = new Color32(221, 164, 92, 255);
+    [SerializeField] private Color _systemExperienceColor = new Color32(141, 217, 155, 255);
+    [SerializeField] private Color _systemRewardColor = new Color32(235, 203, 121, 255);
+    [SerializeField] private Color _systemSocialColor = new Color32(120, 185, 233, 255);
+    [SerializeField] private Color _systemSkillColor = new Color32(197, 160, 240, 255);
+    [SerializeField] private Color _systemErrorColor = new Color32(241, 109, 109, 255);
+    [SerializeField] private Color _systemHealingColor = new Color32(112, 218, 205, 255);
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -60,6 +71,46 @@ public class ChatManager : MonoBehaviour
         {
             _chatInput.onSubmit.RemoveListener(OnMessageSubmitted);
         }
+    }
+    private Color GetSystemMessageColor(int messageId)
+    {
+        return messageId switch
+        {
+            // Combat
+            3 => _systemDamageColor,
+            19 => _damageTakenColor,
+            56 => _systemMissColor,
+
+            // Experience, levels, class progression
+            5 or 6 or 21 => _systemExperienceColor,
+
+            // Items and rewards
+            9 or 14 or 23 or 47 or 54 => _systemRewardColor,
+
+            // Healing
+            18 => _systemHealingColor,
+
+            // Skills, buffs and quests
+            7 or 8 or 11 or 20 or 22
+                or 51 or 52 or 53 => _systemSkillColor,
+
+            // Clan and party information
+            24 or 28 or 29 or 30 or 31
+                or 32 or 33 or 34 or 35 or 36
+                or 37 or 38 or 39 or 41
+                or 43 or 44 or 45 or 46
+                or 49 => _systemSocialColor,
+
+            // Errors and restrictions
+            10 or 13 or 15 or 17 or 26
+                or 27 or 40 or 42 or 48 => _systemErrorColor,
+
+            // Warnings
+            12 or 25 or 50 or 55 => _systemMissColor,
+
+            // General information
+            _ => _systemInfoColor
+        };
     }
 
     public void AddMessage(
@@ -107,7 +158,9 @@ public class ChatManager : MonoBehaviour
 
     public void AddCombatMessage(
         GameMessageType type,
-        string message)
+        string message,
+        int systemMessageId = 0)
+
     {
         if (string.IsNullOrWhiteSpace(message))
             return;
@@ -127,7 +180,9 @@ public class ChatManager : MonoBehaviour
         switch (type)
         {
             case GameMessageType.System:
-                newMessage.color = _systemColor;
+                newMessage.color = systemMessageId > 0
+                    ? GetSystemMessageColor(systemMessageId)
+                    : _systemColor;
                 break;
 
             case GameMessageType.DamageDealt:

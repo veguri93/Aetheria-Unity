@@ -395,6 +395,13 @@ public static class SystemMessageTable
         55,
         "$1_DISAPPEARED_FROM_YOUR_INVENTORY",
         "$1 disappeared from your inventory.")
+},
+{
+    56,
+    new SystemMessage(
+        56,
+        "YOUR_ATTACK_MISSED",
+        "Your attack missed.")
 }
         };
 

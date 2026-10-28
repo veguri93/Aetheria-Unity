@@ -120,7 +120,7 @@ public sealed class PlayerTitleMarquee : MonoBehaviour
         properties.SetVector(OriginId, transform.position);
         properties.SetVector(RightId, camera.transform.right);
         properties.SetVector(UpId, camera.transform.up);
-        properties.SetVector(SizeId, new Vector4(viewportWidth * .5f, viewportHeight * .5f, 0, 0));
+        properties.SetVector(SizeId, new Vector4(viewportWidth * .5f * Mathf.Abs(transform.lossyScale.x), viewportHeight * .5f * Mathf.Abs(transform.lossyScale.y), 0, 0));
         Apply(firstRenderers); Apply(secondRenderers);
     }
     private Renderer[] CacheRenderers(TextMeshPro strip)

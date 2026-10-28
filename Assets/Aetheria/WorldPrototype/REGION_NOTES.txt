@@ -1,0 +1,18 @@
+AETHERIA — STILLMERE BASIN
+Experimental world region; no gameplay systems included.
+
+Terrain: 1000 × 1000 metres; 1025 height samples; 512 splatmap; four layers.
+Village A: (270,47,280), clear radius 90m. Village B: (670,60,710), clear radius 82m.
+Both sites remain empty; reserve markers are EditorOnly.
+Lake: about 220 × 140m, water elevation 35m. No swimming mechanics.
+Trees: 1382; rocks: 120; shrubs: 240.
+Native Slavic World Free assets reused through prototype-only prefab/material variants.
+Tree LODs retained; instanced materials; near-field instanced terrain grass at 65m; simple trunk collision.
+TerrainCollider and baked prototype NavMesh included. Water basin excluded from navigation.
+Main route maximum sampled slope: 17.22 degrees (355 samples).
+Town-core maximum slope A/B: 0.00 / 0.00 degrees.
+PASS: complete navigable connection between both town sites.
+
+Existing gameplay scenes, GameServer, scripts and shared source assets are unchanged.
+Missing production features: animated/reflection-quality water, audio ambience, world streaming and gameplay spawn integration.
+Use Scene view fly navigation to explore; overview camera is for composition, not a player controller.

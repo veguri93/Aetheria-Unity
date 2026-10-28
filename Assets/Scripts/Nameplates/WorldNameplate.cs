@@ -27,6 +27,8 @@ public sealed class WorldNameplate : MonoBehaviour
 
     private Vector3 fallbackAnchor;
     private bool initialized;
+    private float visibilityAlpha = -1f;
+    public float ReadabilityScale { get; private set; } = 1f;
 
     [Header("Player Title Marquee")]
     [SerializeField] private PlayerTitleMarquee titleMarquee;
@@ -40,7 +42,7 @@ public sealed class WorldNameplate : MonoBehaviour
         if (titleMarquee)
         {
             if (titleScrolling) titleMarquee.Configure(actualTitle, style);
-            titleMarquee.SetVisible(titleScrolling && Visible, 1f);
+            titleMarquee.SetVisible(titleScrolling && Visible, Mathf.Max(0f, visibilityAlpha));
         }
         if (titleScrolling && titleLabel) titleLabel.enabled = false;
     }
@@ -105,6 +107,7 @@ public sealed class WorldNameplate : MonoBehaviour
         }
 
         if (titleScrolling && titleMarquee) titleMarquee.Configure(this.actualTitle, style);
+        visibilityAlpha = -1f;
         SetVisible(false, 0f);
         if (targetIndicator) targetIndicator.RefreshLayout();
 
@@ -200,6 +203,9 @@ public sealed class WorldNameplate : MonoBehaviour
             style &&
             !string.IsNullOrWhiteSpace(label.text);
 
+        alpha = Mathf.Clamp01(alpha);
+        if (Visible == visible && Mathf.Approximately(visibilityAlpha, alpha)) return;
+        visibilityAlpha = alpha;
         Visible = visible;
         if (targetIndicator) targetIndicator.SetVisibility(visible, alpha);
 
@@ -243,12 +249,18 @@ public sealed class WorldNameplate : MonoBehaviour
             return;
 
         Vector3 anchor = AnchorPosition;
+        // Keep a 24-pixel name em at 1080p, proportional at other resolutions.
+        // Projection depth (not Euclidean distance) avoids growth at screen edges.
+        float depth = Mathf.Max(camera.nearClipPlane, Vector3.Dot(anchor - camera.transform.position, camera.transform.forward));
+        float viewHeight = camera.orthographic ? 2f * camera.orthographicSize :
+            2f * depth * Mathf.Tan(camera.fieldOfView * .5f * Mathf.Deg2Rad);
+        ReadabilityScale = viewHeight * (24f / 1080f) / Mathf.Max(.01f, style.fontSize * .1f);
 
         UpdateLabelPose(
             label,
-            anchor + camera.transform.right * (targetIndicator ? targetIndicator.NameOffset : 0f),
+            anchor + camera.transform.right * (targetIndicator ? targetIndicator.NameOffset * ReadabilityScale : 0f),
             camera);
-        if (targetIndicator) targetIndicator.UpdatePose(anchor, camera.transform.rotation);
+        if (targetIndicator) targetIndicator.UpdatePose(anchor, camera.transform.rotation, ReadabilityScale);
 
 
         if (titleLabel &&
@@ -257,7 +269,7 @@ public sealed class WorldNameplate : MonoBehaviour
         {
             Vector3 titlePosition =
                 anchor +
-                Vector3.up * style.titleVerticalSeparation;
+                camera.transform.up * (style.titleVerticalSeparation * ReadabilityScale);
 
             UpdateLabelPose(
                 titleLabel,
@@ -268,7 +280,7 @@ public sealed class WorldNameplate : MonoBehaviour
 
     }
 
-    private static void UpdateLabelPose(
+    private void UpdateLabelPose(
         TextMeshPro text,
         Vector3 position,
         Camera camera)
@@ -283,8 +295,8 @@ public sealed class WorldNameplate : MonoBehaviour
                 : Vector3.one;
 
         target.localScale = new Vector3(
-            1f / Mathf.Max(Mathf.Abs(scale.x), 0.001f),
-            1f / Mathf.Max(Mathf.Abs(scale.y), 0.001f),
-            1f / Mathf.Max(Mathf.Abs(scale.z), 0.001f));
+            ReadabilityScale / Mathf.Max(Mathf.Abs(scale.x), 0.001f),
+            ReadabilityScale / Mathf.Max(Mathf.Abs(scale.y), 0.001f),
+            ReadabilityScale / Mathf.Max(Mathf.Abs(scale.z), 0.001f));
     }
 }

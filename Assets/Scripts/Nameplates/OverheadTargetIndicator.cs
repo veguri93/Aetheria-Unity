@@ -128,23 +128,23 @@ public sealed class OverheadTargetIndicator : MonoBehaviour
         if (crestRenderer) { crestRenderer.enabled = visible && crest; crestRenderer.color = tint; }
     }
 
-    public void UpdatePose(Vector3 rowCenter, Quaternion rotation)
+    public void UpdatePose(Vector3 rowCenter, Quaternion rotation, float scale = 1f)
     {
         Vector3 right = rotation * Vector3.right;
         if (State != TargetIndicatorState.None)
         {
-            if (leftArrow) leftArrow.SetPose(rowCenter - right * edgeOffset, rotation);
-            if (rightArrow) rightArrow.SetPose(rowCenter + right * edgeOffset, rotation);
+            if (leftArrow) leftArrow.SetPose(rowCenter - right * (edgeOffset * scale), rotation, scale);
+            if (rightArrow) rightArrow.SetPose(rowCenter + right * (edgeOffset * scale), rotation, scale);
         }
         if (crestRenderer && crest)
         {
-            SetPose(crestRenderer.transform, rowCenter + right * crestOffset, rotation, false);
+            SetPose(crestRenderer.transform, rowCenter + right * (crestOffset * scale), rotation, false);
             Vector3 parentScale = crestRenderer.transform.parent.lossyScale;
             Vector3 bounds = crest.bounds.size;
             float width = crestHeight * crest.rect.width / Mathf.Max(1f, crest.rect.height);
             crestRenderer.transform.localScale = new Vector3(
-                width / Mathf.Max(0.001f, bounds.x * Mathf.Abs(parentScale.x)),
-                crestHeight / Mathf.Max(0.001f, bounds.y * Mathf.Abs(parentScale.y)), 1f);
+                width * scale / Mathf.Max(0.001f, bounds.x * Mathf.Abs(parentScale.x)),
+                crestHeight * scale / Mathf.Max(0.001f, bounds.y * Mathf.Abs(parentScale.y)), 1f);
         }
     }
 

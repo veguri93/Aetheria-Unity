@@ -32,6 +32,7 @@ public sealed class CharacterInfoUI : MonoBehaviour
     private void OnGuild(string value)=>Refresh();
     public void Close()=>gameObject.SetActive(false);
     private static string Number(int? value)=>value.HasValue?value.Value.ToString(CultureInfo.InvariantCulture):"—";
+    private static string Rating(double? value)=>value.HasValue?value.Value.ToString("F1",CultureInfo.InvariantCulture):"—";
     private static string Resource(bool known,int current,int maximum)=>known?current.ToString(CultureInfo.InvariantCulture)+" / "+maximum.ToString(CultureInfo.InvariantCulture):"— / —";
     private void Refresh()
     {
@@ -48,7 +49,9 @@ public sealed class CharacterInfoUI : MonoBehaviour
         physicalAttackValue.text=Number(known?stats.PhysicalAttack:(int?)null);magicAttackValue.text=Number(known?stats.MagicAttack:(int?)null);
         physicalDefenseValue.text=Number(known?stats.PhysicalDefense:(int?)null);magicDefenseValue.text=Number(known?stats.MagicDefense:(int?)null);
         attackSpeedValue.text=Number(known?stats.AttackSpeed:(int?)null);castingSpeedValue.text=Number(known?stats.CastingSpeed:(int?)null);
+        accuracyValue.text=Rating(stats?stats.Accuracy:null);
+        evasionValue.text=Rating(stats?stats.Evasion:null);
         // No authoritative final values exist for these fields yet. Never substitute template or client movement values.
-        accuracyValue.text=evasionValue.text=criticalRateValue.text=movementValue.text=pvpValue.text=pkValue.text="—";
+        criticalRateValue.text=movementValue.text=pvpValue.text=pkValue.text="—";
     }
 }

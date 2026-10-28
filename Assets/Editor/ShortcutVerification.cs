@@ -38,7 +38,7 @@ public static class ShortcutVerification
         EditorSceneManager.OpenScene("Assets/_Recovery/0.unity");
         File.WriteAllText(Folder+"verification.txt","Unity Play Mode; isolated handler/input and loopback packet tests, NOT live GameServer.\n");
         foreach(var c in UnityEngine.Object.FindObjectsByType<GameServerConnection>(FindObjectsInactive.Include))c.enabled=false;
-        var b=UnityEngine.Object.FindFirstObjectByType<SkillShortcutBarUI>();Set(b.GetComponent<PersistentUIPosition>(),"preferenceKey",Key);
+        var b= UnityEngine.Object.FindAnyObjectByType<SkillShortcutBarUI>(); Set(b.GetComponent<PersistentUIPosition>(),"preferenceKey",Key);
         PlayerPrefs.DeleteKey(Key);SessionState.SetBool(Key,true);SessionState.SetBool(Key+"restore",true);EditorApplication.EnterPlaymode();
     }
     static void Set(object o,string n,object v)=>o.GetType().GetField(n,BindingFlags.Instance|BindingFlags.NonPublic).SetValue(o,v);
@@ -46,7 +46,7 @@ public static class ShortcutVerification
     static PointerEventData Event()=>new PointerEventData(EventSystem.current){button=PointerEventData.InputButton.Left};
     static void Tick(){if(EditorApplication.timeSinceStartup<ready)return;try{
         if(stage++==0){
-            bar=UnityEngine.Object.FindFirstObjectByType<SkillShortcutBarUI>();slots=bar.GetComponentsInChildren<SkillShortcutSlotUI>().OrderBy(s=>s.SlotNumber).ToArray();position=bar.GetComponent<PersistentUIPosition>();
+            bar= UnityEngine.Object.FindAnyObjectByType<SkillShortcutBarUI>(); slots=bar.GetComponentsInChildren<SkillShortcutSlotUI>().OrderBy(s=>s.SlotNumber).ToArray();position=bar.GetComponent<PersistentUIPosition>();
             Check(slots.Length==36,"36 slots created from original prefab");
             for(int i=0;i<36;i++){var r=(RectTransform)slots[i].transform;Check(r.anchoredPosition==new Vector2(9+i%12*44,9+i/12*44),"Slot "+(i+1)+" in correct row/column");Check(slots[i].GetComponentInChildren<TMP_Text>(true).text==(i<12?"F"+(i+1):""),"Key label "+(i+1));}
             listener=new TcpListener(IPAddress.Loopback,0);listener.Start();sender=new TcpClient();sender.Connect((IPEndPoint)listener.LocalEndpoint);receiver=listener.AcceptTcpClient();Set(GameServerConnection.Instance,"_client",sender);

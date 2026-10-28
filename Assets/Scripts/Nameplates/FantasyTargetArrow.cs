@@ -46,13 +46,13 @@ public sealed class FantasyTargetArrow : MonoBehaviour
         properties.SetFloat(PhaseId, pointLeft ? 0.8f : 0f);
         meshRenderer.SetPropertyBlock(properties);
     }
-    public void SetPose(Vector3 position, Quaternion rotation)
+    public void SetPose(Vector3 position, Quaternion rotation, float scale = 1f)
     {
         transform.SetPositionAndRotation(position, rotation);
         Vector3 parentScale = transform.parent ? transform.parent.lossyScale : Vector3.one;
         transform.localScale = new Vector3(
-            height * 0.9f / Mathf.Max(Mathf.Abs(parentScale.x), 0.001f),
-            height * 1.05f / Mathf.Max(Mathf.Abs(parentScale.y), 0.001f),
+            height * scale * 0.9f / Mathf.Max(Mathf.Abs(parentScale.x), 0.001f),
+            height * scale * 1.05f / Mathf.Max(Mathf.Abs(parentScale.y), 0.001f),
             1f / Mathf.Max(Mathf.Abs(parentScale.z), 0.001f));
     }
     private void OnDisable() { if (meshRenderer) meshRenderer.enabled = false; }

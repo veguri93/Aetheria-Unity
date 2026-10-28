@@ -13,11 +13,13 @@ public static class CharacterStatsPacketHandler
         // Legacy: 7, 9, 16
         // Range: 17
         // Range + Attack Interval: 18
+        // Appended Accuracy + Evasion: 20
         if (parts.Length != 7 &&
             parts.Length != 9 &&
             parts.Length != 16 &&
             parts.Length != 17 &&
-            parts.Length != 18)
+            parts.Length != 18 &&
+            parts.Length != 20)
             return;
 
         int[] values = new int[7];
@@ -87,7 +89,7 @@ public static class CharacterStatsPacketHandler
                 return;
         }
 
-        if (parts.Length == 18)
+        if (parts.Length >= 18)
         {
             if (!int.TryParse(
                     parts[17],
@@ -97,6 +99,19 @@ public static class CharacterStatsPacketHandler
             if (attackIntervalMs <= 0 ||
                 attackIntervalMs == int.MaxValue)
                 return;
+        }
+
+        // Validate the complete extension before changing any client state.
+        // Older snapshots explicitly clear these values instead of showing stale stats.
+        double? accuracy = null;
+        double? evasion = null;
+        if (parts.Length == 20)
+        {
+            if (!TryReadRating(parts[18], out double parsedAccuracy) ||
+                !TryReadRating(parts[19], out double parsedEvasion))
+                return;
+            accuracy = parsedAccuracy;
+            evasion = parsedEvasion;
         }
 
         // Apply combat values independently of the UI.
@@ -109,13 +124,13 @@ public static class CharacterStatsPacketHandler
             if (parts.Length >= 17)
                 combat.SetAttackRange(attackRange);
 
-            if (parts.Length == 18)
+            if (parts.Length >= 18)
                 combat.SetAttackInterval(
                     attackIntervalMs / 1000f);
         }
 
         PlayerStatsUI ui =
-            Object.FindAnyObjectByType<PlayerStatsUI>();
+            Object.FindAnyObjectByType<PlayerStatsUI>(FindObjectsInactive.Include);
 
         if (!ui)
             return;
@@ -128,6 +143,8 @@ public static class CharacterStatsPacketHandler
             values[4],
             values[5],
             values[6]);
+
+        ui.SetAccuracyEvasion(accuracy, evasion);
 
         ui.SetEffectiveAttributes(
             might,
@@ -147,4 +164,10 @@ public static class CharacterStatsPacketHandler
                 ui.SetMana(currentMp, maxMp);
         }
     }
+    private static bool TryReadRating(string text, out double value)
+    {
+        return double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out value) &&
+            !double.IsNaN(value) && !double.IsInfinity(value) && value >= 0;
+    }
+
 }

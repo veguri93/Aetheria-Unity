@@ -212,12 +212,25 @@ public class GameServerConnection : MonoBehaviour
         }
     }
 
+
     private void NotifyAttackConnectionLost()
     {
-        LocalPlayer.Instance?
-            .GetComponent<PlayerCombat>()?
-            .OnAttackConnectionLost();
+        LocalPlayer player = LocalPlayer.Instance;
+
+        // Unity objects may already be destroyed
+        // when exiting Play Mode.
+        if (player == null)
+            return;
+
+        PlayerCombat combat =
+            player.GetComponent<PlayerCombat>();
+
+        if (combat == null)
+            return;
+
+        combat.OnAttackConnectionLost();
     }
+
 
 
     public async void SendRespawnRequest(

@@ -20,6 +20,10 @@ public class PlayerStatsUI : MonoBehaviour
     public int MagicDefense { get; private set; }
     public int AttackSpeed { get; private set; }
     public int CastingSpeed { get; private set; }
+    public double? Accuracy { get; private set; }
+    public double? Evasion { get; private set; }
+    public void SetAccuracyEvasion(double? accuracy, double? evasion)
+    { Accuracy = accuracy; Evasion = evasion; Changed?.Invoke(); }
     public int? Might { get; private set; }
     public int? Grace { get; private set; }
     public int? Aether { get; private set; }

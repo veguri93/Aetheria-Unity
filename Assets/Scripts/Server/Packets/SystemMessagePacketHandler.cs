@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿
+using System.Text;
 using UnityEngine;
 
 public static class SystemMessagePacketHandler
@@ -45,8 +46,11 @@ public static class SystemMessagePacketHandler
                     parts[i]);
         }
 
+        // Pass the original message ID so ChatManager
+        // can select the appropriate category color.
         ChatManager.Instance?.AddCombatMessage(
             GameMessageType.System,
-            text);
+            text,
+            messageId);
     }
 }

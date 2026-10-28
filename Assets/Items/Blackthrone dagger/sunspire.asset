@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: sunspire
   m_EditorClassIdentifier: Assembly-CSharp::ItemVisualAsset
   definition:
-    itemId: 3240
-    itemName: Scarlet Requiem
-    type: Dagger
+    itemId: 3242
+    itemName: Sunspire
+    type: Bow
     description: Short sword to fight against evil
     icon: {fileID: 21300000, guid: 5da55db2f3bf1c94a9e970e722910d4d, type: 3}
-    prefab: {fileID: 919132149155446097, guid: d76e9b1f191730b448246ca53f13380f, type: 3}
+    prefab: {fileID: 2921853762554843894, guid: 2d225752f9e5de94fb5c655d60271111, type: 3}
     groundPosition: {x: 0, y: 2, z: 0}
     groundRotation: {x: 0, y: 0, z: 0}
-    groundScale: {x: 2, y: 2, z: 2}
+    groundScale: {x: 1, y: 1, z: 1}
