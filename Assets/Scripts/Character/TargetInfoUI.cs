@@ -96,8 +96,11 @@ public sealed class TargetInfoUI : MonoBehaviour
     }
     private void Layout()
     {
-        panel.anchoredPosition = screenOffset;
         panel.sizeDelta = new Vector2(width, healthRow.activeSelf || guildText.gameObject.activeSelf ? detailedHeight : nameOnlyHeight);
+        if (Application.isPlaying && panel.TryGetComponent<PersistentUIPosition>(out var position))
+            position.ClampToScreen();
+        else
+            panel.anchoredPosition = screenOffset;
     }
     private void OnHealth(int current, int max, bool snap)
     {
