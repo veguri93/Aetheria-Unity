@@ -262,6 +262,16 @@ public static class ClientPacketHandler
                 AttackResultPacketHandler.Handle(packet);
                 break;
 
+            case 91:
+            case 94:
+            case 97:
+            case 99:
+            case 101:
+            case 102:
+            case 103:
+                TradeWindowUI.Handle(packet);
+                break;
+
             default:
                 Debug.LogWarning(
                     $"Unknown packet type: {packet.Type}");

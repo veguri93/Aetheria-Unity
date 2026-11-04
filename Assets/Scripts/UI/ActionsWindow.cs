@@ -17,6 +17,22 @@ public sealed class ActionsWindow : MonoBehaviour
     private Vector2 parentSize;
     private float nextRefresh;
     private TMP_Text[] labels;
+    private Button tradeButton;
+    private void Awake()
+    {
+        foreach (var button in GetComponentsInChildren<Button>(true))
+            if (button.name == "TradeButton")
+            {
+                tradeButton = button;
+                tradeButton.onClick.AddListener(TradeTarget);
+                break;
+            }
+    }
+    public void TradeTarget()
+    {
+        TradeWindowUI.EnsureCreated();
+        TradeWindowUI.Instance?.RequestTarget();
+    }
 
     private RemotePlayer SelectedPlayer => TargetManager.Instance
         ? TargetManager.Instance.CurrentTarget as RemotePlayer : null;
@@ -56,6 +72,7 @@ public sealed class ActionsWindow : MonoBehaviour
     public void RefreshAvailability()
     {
         bool invite = CanInvite, leave = CanLeave;
+        if (tradeButton) tradeButton.interactable = CanInvite;
         bool changed = (inviteButton && inviteButton.interactable != invite) ||
             (leaveButton && leaveButton.interactable != leave);
         if (inviteButton) inviteButton.interactable = invite;
@@ -102,6 +119,8 @@ public sealed class ActionsWindow : MonoBehaviour
             detail = !Connected ? "Connect to the game to invite a player." : !CanInvite ? "Select another player to invite." : "Invite the selected player to your party.";
         else if (owner.gameObject == leaveButton.gameObject)
             detail = !Connected ? "Connect to the game to leave a party." : !CanLeave ? "You are not in a party." : "Leave your current party. Confirmation required.";
+        else if (tradeButton && owner.gameObject == tradeButton.gameObject)
+            detail = CanInvite ? "Trade items with the selected nearby player." : "Select another player to trade.";
         else detail = "Not available yet.";
         string value = owner.ActionName + "\n<size=12>" + detail + "</size>";
         if (tooltipText.text != value) tooltipText.text = value;

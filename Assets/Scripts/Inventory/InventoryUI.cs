@@ -288,6 +288,7 @@ public class InventoryUI : MonoBehaviour, IPointerClickHandler, IPointerDownHand
 
     [SerializeField]
     private ItemVisualDatabase itemVisualDatabase;
+    public ItemVisualDatabase ItemVisuals => itemVisualDatabase;
 
     [SerializeField]
     private int slotCount = 60;

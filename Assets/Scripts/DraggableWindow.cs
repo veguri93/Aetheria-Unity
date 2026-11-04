@@ -8,6 +8,8 @@ public class DraggableWindow : MonoBehaviour,
     [SerializeField]
     private RectTransform window;
 
+    public void SetWindow(RectTransform target) => window = target;
+
     private Vector2 _pointerOffset;
 
     public void OnBeginDrag(

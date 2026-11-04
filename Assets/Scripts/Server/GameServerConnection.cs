@@ -60,7 +60,9 @@ public class GameServerConnection : MonoBehaviour
         {
             NpcHtmlWindow.Instance?.Hide();
             _client?.Close();
+            _client = null;
             MerchantPurchaseState.Disconnected();
+            TradeWindowUI.Instance?.Disconnected();
             NotifyAttackConnectionLost();
             Debug.LogException(ex);
         }
@@ -208,6 +210,7 @@ public class GameServerConnection : MonoBehaviour
         {
             Debug.LogError($"Failed to cancel attack: {ex.Message}");
             _client?.Close();
+            _client = null;
             NotifyAttackConnectionLost();
         }
     }
@@ -1383,6 +1386,35 @@ public class GameServerConnection : MonoBehaviour
                 $"Failed to send quest complete request: " +
                 $"{ex.Message}");
         }
+    }
+
+    private readonly System.Threading.SemaphoreSlim tradeSendLock = new System.Threading.SemaphoreSlim(1, 1);
+
+    public async void SendTradeInvitation(int targetId)
+    {
+        await tradeSendLock.WaitAsync();
+        try
+        {
+            if (!IsConnected) throw new System.IO.IOException("Not connected");
+            // Target selection and request are ordered on the same connection.
+            await _client.GetStream().WriteAsync(BuildPacket(47, targetId.ToString()));
+            await _client.GetStream().WriteAsync(BuildPacket(90, string.Empty));
+        }
+        catch (System.Exception ex) { Debug.LogWarning(ex.Message); TradeWindowUI.Instance?.Disconnected(); }
+        finally { tradeSendLock.Release(); }
+    }
+
+    public async void SendTradePacket(ushort type, string payload)
+    {
+        if (type != 92 && type != 93 && type != 95 && type != 96 && type != 98 && type != 100) return;
+        await tradeSendLock.WaitAsync();
+        try
+        {
+            if (!IsConnected) throw new System.IO.IOException("Not connected");
+            await _client.GetStream().WriteAsync(BuildPacket(type, payload));
+        }
+        catch (System.Exception ex) { Debug.LogWarning(ex.Message); TradeWindowUI.Instance?.Disconnected(); }
+        finally { tradeSendLock.Release(); }
     }
 
     private byte[] BuildPacket(ushort packetType, string data)
