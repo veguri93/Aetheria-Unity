@@ -402,7 +402,11 @@ public static class SystemMessageTable
         56,
         "YOUR_ATTACK_MISSED",
         "Your attack missed.")
-}
+},
+            { 57, new SystemMessage(57, "TRADE_REQUEST_SENT", "You have sent a trade request to $1.") },
+            { 58, new SystemMessage(58, "TRADE_REQUEST_REJECTED", "$1 rejected your trade request.") },
+            { 59, new SystemMessage(59, "TRADE_SUCCESSFUL", "Trade successful.") },
+            { 60, new SystemMessage(60, "TRADE_TARGET_BUSY", "$1 is busy trading with another player.") }
         };
 
     public static SystemMessage Get(

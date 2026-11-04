@@ -21,7 +21,8 @@ public sealed class TradeWindowUI : MonoBehaviour
     private float invitationExpiresAt;
     private TMP_InputField quantity;
     private Button accept, reject, confirm, cancel, add, close;
-    private Guid tradeId;
+    private Guid tradeId, expiredInvitation;
+    private readonly HashSet<Guid> finishedTrades = new HashSet<Guid>();
     private int revision, selectedId;
     private bool initiator, active, pending, recovery, myConfirmed, theirConfirmed;
     private readonly List<OfferItem> myItems = new List<OfferItem>();
@@ -48,8 +49,8 @@ public sealed class TradeWindowUI : MonoBehaviour
         view.inventory = source;
         view.visuals = source.ItemVisuals;
         view.Build();
+        Instance = view; // Publish only after both windows are initialized.
     }
-    private void Awake() { Instance = this; }
     private void OnDestroy()
     {
         ClientInventory.Changed -= InventoryChanged;
@@ -99,6 +100,8 @@ public sealed class TradeWindowUI : MonoBehaviour
         invitationText.alignment = TextAlignmentOptions.Center;
         var timer = Box("InviteTimer", invitation, 20, 146, 360, 6, new Color(.15f,.16f,.18f));
         var fill = Box("Fill", timer, 0, 0, 360, 6, new Color(.65f,.51f,.28f));
+        fill.anchorMin = Vector2.zero; fill.anchorMax = Vector2.one;
+        fill.offsetMin = fill.offsetMax = Vector2.zero;
         invitationTimer = timer.gameObject.AddComponent<Slider>();
         invitationTimer.fillRect = fill; invitationTimer.interactable = false;
         invitationTimer.transition = Selectable.Transition.None;
@@ -125,16 +128,28 @@ public sealed class TradeWindowUI : MonoBehaviour
     {
         if (tradeId != Guid.Empty && (!GameServerConnection.Instance || !GameServerConnection.Instance.IsConnected))
             Disconnected();
-        if (invitation.gameObject.activeSelf && tradeId != Guid.Empty && !active)
+        if (tradeId != Guid.Empty && !active)
         {
             invitationTimer.value = Mathf.Clamp01((invitationExpiresAt - Time.unscaledTime) / 30f);
             if (Time.unscaledTime >= invitationExpiresAt)
-                invitation.gameObject.SetActive(false); // The server owns expiration and trade state.
+            {
+                ExpireLocalInvitation();
+            }
         }
         if (!panel || !panel.gameObject.activeSelf) return;
         var parent = panel.parent as RectTransform;
         float scale = Mathf.Min(1f, parent.rect.width / 780f, parent.rect.height / 600f);
         panel.localScale = Vector3.one * Mathf.Max(.1f, scale);
+    }
+    private void ExpireLocalInvitation()
+    {
+        // Clear local pending state; only packet 94 may authorize an active trade.
+        // Keep the expired ID to ignore late invites, but allow a server acceptance
+        // that won the deadline race to arrive before its terminal packet.
+        expiredInvitation = tradeId;
+        tradeId = Guid.Empty; pending = false;
+        invitation.gameObject.SetActive(false);
+        Refresh();
     }
     public void RequestTarget()
     {
@@ -158,9 +173,10 @@ public sealed class TradeWindowUI : MonoBehaviour
         if (p.Length == 0 || !Guid.TryParse(p[0], out var id)) return;
         if (type == 91 || type == 94)
         {
-            if (p.Length != 4 || (p[3] != "0" && p[3] != "1")) return;
+            if (p.Length != 4 || (p[3] != "0" && p[3] != "1") || finishedTrades.Contains(id)) return;
+            if (type == 91 && (id == expiredInvitation || id == tradeId)) return;
             if (tradeId != Guid.Empty && tradeId != id) return;
-            if (type == 91 && active) return;
+            if (active || id == Guid.Empty) return;
             tradeId = id; pending = recovery = myConfirmed = theirConfirmed = false;
             active = type == 94; revision = 0; selectedId = 0;
             myItems.Clear(); theirItems.Clear();
@@ -187,11 +203,16 @@ public sealed class TradeWindowUI : MonoBehaviour
         {
             if (id != Guid.Empty && id != tradeId) return;
             pending = false;
-            recovery = p.Length > 2 && p[1] == "RECOVERY";
-            status.text = string.Join("|", p.Skip(recovery ? 2 : 1));
+            recovery = recovery || (p.Length > 2 && p[1] == "RECOVERY");
+            status.text = string.Join("|", p.Skip(p.Length > 2 && p[1] == "RECOVERY" ? 2 : 1));
             if (active) Show();
             else ShowInvitation(status.text);
             Refresh(); return;
+        }
+        if ((type == 101 || type == 102) && id != Guid.Empty)
+        {
+            finishedTrades.Add(id);
+            if (id == expiredInvitation) expiredInvitation = Guid.Empty;
         }
         if (id != tradeId || id == Guid.Empty) return;
         if (type == 101 || type == 102)
@@ -210,11 +231,13 @@ public sealed class TradeWindowUI : MonoBehaviour
         if (type == 97)
         {
             if (!TryParseOffer(p[2], out var first) || !TryParseOffer(p[3], out var second)) return;
+            bool changed = incomingRevision != revision;
             revision = incomingRevision;
             myItems.Clear(); myItems.AddRange(initiator ? first : second);
             theirItems.Clear(); theirItems.AddRange(initiator ? second : first);
-            myConfirmed = theirConfirmed = pending = false;
-            status.text = "Offer updated. Both players must confirm this revision.";
+            if (changed) myConfirmed = theirConfirmed = false;
+            pending = false;
+            status.text = changed ? "Offer updated. Both players must confirm this revision." : "Offer synchronized.";
             RebuildOffers();
         }
         else if (type == 99)
@@ -304,6 +327,7 @@ public sealed class TradeWindowUI : MonoBehaviour
     }
     public void Disconnected()
     {
+        if (!this || !invitation || !panel) return; // A late connection callback may outlive the scene.
         bool hadTrade = tradeId != Guid.Empty;
         invitation.gameObject.SetActive(false);
         if (!active) panel.gameObject.SetActive(false);
