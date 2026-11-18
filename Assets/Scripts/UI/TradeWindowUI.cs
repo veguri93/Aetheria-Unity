@@ -19,6 +19,7 @@ public sealed class TradeWindowUI : MonoBehaviour
     private Slider invitationTimer;
     private Button invitationCancel, invitationClose;
     private float invitationExpiresAt;
+    private float pendingExpiresAt;
     private TMP_InputField quantity;
     private Button accept, reject, confirm, cancel, add, close;
     private Guid tradeId, expiredInvitation;
@@ -126,8 +127,9 @@ public sealed class TradeWindowUI : MonoBehaviour
     }
     private void Update()
     {
-        if (tradeId != Guid.Empty && (!GameServerConnection.Instance || !GameServerConnection.Instance.IsConnected))
+        if ((pending || tradeId != Guid.Empty) && (!GameServerConnection.Instance || !GameServerConnection.Instance.IsConnected))
             Disconnected();
+        CheckPendingTimeout();
         if (tradeId != Guid.Empty && !active)
         {
             invitationTimer.value = Mathf.Clamp01((invitationExpiresAt - Time.unscaledTime) / 30f);
@@ -146,6 +148,11 @@ public sealed class TradeWindowUI : MonoBehaviour
         // Clear local pending state; only packet 94 may authorize an active trade.
         // Keep the expired ID to ignore late invites, but allow a server acceptance
         // that won the deadline race to arrive before its terminal packet.
+        if (pending)
+        {
+            FailPendingRequest();
+            return;
+        }
         expiredInvitation = tradeId;
         tradeId = Guid.Empty; pending = false;
         invitation.gameObject.SetActive(false);
@@ -157,7 +164,7 @@ public sealed class TradeWindowUI : MonoBehaviour
         var target = TargetManager.Instance ? TargetManager.Instance.CurrentTarget as RemotePlayer : null;
         if (!target || !GameServerConnection.Instance || !GameServerConnection.Instance.IsConnected)
         { ShowInvitation("Select another connected player first."); Refresh(); return; }
-        pending = true;
+        BeginPendingRequest();
         ShowInvitation("Sending trade invitation…");
         GameServerConnection.Instance.SendTradeInvitation(target.ObjectId);
         Refresh();
@@ -284,8 +291,26 @@ public sealed class TradeWindowUI : MonoBehaviour
     private void Send(ushort type, string text)
     {
         if (pending || recovery || tradeId == Guid.Empty) return;
-        pending = true; Refresh();
+        BeginPendingRequest(); Refresh();
         GameServerConnection.Instance.SendTradePacket(type, text);
+    }
+    private void BeginPendingRequest()
+    {
+        pending = true;
+        pendingExpiresAt = Time.unscaledTime + 30f;
+    }
+    private void CheckPendingTimeout()
+    {
+        if (pending && Time.unscaledTime >= pendingExpiresAt) FailPendingRequest();
+    }
+    private void FailPendingRequest()
+    {
+        // A missing response cannot prove cancellation or rollback. Close the
+        // connection before clearing UI state; reconnect reloads authoritative items.
+        if (GameServerConnection.Instance) GameServerConnection.Instance.DisconnectForTradeFailure();
+        Disconnected();
+        ShowInvitation("Trade response timed out. Reconnect to verify your inventory; the trade may have completed.");
+        Refresh();
     }
     private void AddSelected()
     {

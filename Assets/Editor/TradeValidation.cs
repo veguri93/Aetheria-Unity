@@ -64,7 +64,7 @@ public static class TradeValidation
         Check(((UnityEngine.UI.Slider)Get("invitationTimer")).fillRect.sizeDelta == Vector2.zero,"countdown fill stays inside popup");
         float deadline=(float)Get("invitationExpiresAt"); Packet(91,id+"|999|Partner|1");
         Check((float)Get("invitationExpiresAt")==deadline,"duplicate invitation does not restart countdown");
-        Set("pending",true); typeof(TradeWindowUI).GetMethod("ExpireLocalInvitation",flags).Invoke(view,null);
+        Set("pending",false); typeof(TradeWindowUI).GetMethod("ExpireLocalInvitation",flags).Invoke(view,null);
         Check((Guid)Get("tradeId")==Guid.Empty && !(bool)Get("pending") && !Visible("invitation"),"local expiry clears ID and pending state");
         Packet(91,id+"|999|Partner|1"); Check(!Visible("invitation"),"late duplicate invite ignored");
         Packet(94,id+"|999|Partner|0"); Check(Visible("panel") && !Visible("invitation"),"server acceptance winning expiry race opens trade");
@@ -80,11 +80,64 @@ public static class TradeValidation
         Check(SystemMessageTable.Get(58).Text.Replace("$1","Partner")=="Partner rejected your trade request.","rejection message substitution");
         Check(SystemMessageTable.Get(59).Text=="Trade successful.","success message");
         Check(SystemMessageTable.Get(60).Text.Replace("$1","Partner")=="Partner is busy trading with another player.","busy message substitution");
+        void Invoke(string method) => typeof(TradeWindowUI).GetMethod(method,flags).Invoke(view,null);
+        Invoke("BeginPendingRequest");
+        Check((bool)Get("pending") && (float)Get("pendingExpiresAt") > Time.unscaledTime,"initial request has deadline without trade ID");
+        Invoke("CheckPendingTimeout"); Check((bool)Get("pending"),"request does not time out before deadline");
+        Set("pendingExpiresAt",Time.unscaledTime-1f); Invoke("CheckPendingTimeout");
+        Check(!(bool)Get("pending") && (Guid)Get("tradeId")==Guid.Empty,"initial response timeout clears pending");
+        Check(!Visible("panel") && Visible("invitation") && ((UnityEngine.UI.Button)Get("invitationClose")).gameObject.activeSelf,"timeout is dismissible without opening trade");
+        Check(((TMPro.TMP_Text)Get("invitationText")).text.Contains("may have completed"),"timeout does not claim rollback");
+        id=Guid.NewGuid(); Packet(94,id+"|999|Partner|1"); Invoke("BeginPendingRequest");
+        Set("pendingExpiresAt",Time.unscaledTime-1f); Invoke("CheckPendingTimeout");
+        Check(!(bool)Get("pending") && !(bool)Get("active") && (Guid)Get("tradeId")==Guid.Empty,"active request timeout clears unusable trade controls");
+        id=Guid.NewGuid(); Packet(94,id+"|999|Partner|1"); Invoke("BeginPendingRequest"); Packet(97,id+"|0||");
+        Set("pendingExpiresAt",Time.unscaledTime-1f); Invoke("CheckPendingTimeout");
+        Check((bool)Get("active") && (Guid)Get("tradeId")==id,"acknowledged request does not time out");
+        Packet(101,id.ToString());
+        id=Guid.NewGuid(); Packet(91,id+"|999|Partner|1"); Invoke("BeginPendingRequest"); Invoke("ExpireLocalInvitation");
+        Check(!(bool)Get("pending") && (Guid)Get("tradeId")==Guid.Empty && ((TMPro.TMP_Text)Get("invitationText")).text.Contains("Reconnect"),"expiry with an outstanding accept requires reconnect");
         Directory.CreateDirectory("Builds/TradeClient");
         File.WriteAllText("Builds/TradeClient/ui-regression.txt",$"PASS: {passed} Unity UI regression checks.");
         Debug.Log($"PASS: {passed} Unity UI regression checks.");
         // Leave the recipient presentation visible for visual inspection. Stop Play Mode to discard it.
         Packet(91,Guid.NewGuid()+"|999|Preview partner|1");
+    }
+
+    [MenuItem("Tools/Aetheia/Trade/Run Timeout Regression (Play Mode)")]
+    public static async void TimeoutRegression()
+    {
+        if (!EditorApplication.isPlaying || (GameServerConnection.Instance && GameServerConnection.Instance.IsConnected)) return;
+        try
+        {
+            Regression();
+            var connection=GameServerConnection.Instance;
+            if (!connection) throw new Exception("Missing connection component");
+            var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+            var field=typeof(GameServerConnection).GetField("_client",flags);
+            var gate=(System.Threading.SemaphoreSlim)typeof(GameServerConnection).GetField("tradeSendLock",flags).GetValue(connection);
+            var listener=new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback,0);
+            listener.Start();
+            using var client=new System.Net.Sockets.TcpClient();
+            await client.ConnectAsync(System.Net.IPAddress.Loopback,((System.Net.IPEndPoint)listener.LocalEndpoint).Port);
+            using var peer=await listener.AcceptTcpClientAsync(); listener.Stop();
+            field.SetValue(connection,client);
+            await gate.WaitAsync();
+            try
+            {
+                var task=(System.Threading.Tasks.Task)typeof(GameServerConnection).GetMethod("SendTradeFramesAsync",flags)
+                    .Invoke(connection,new object[]{new byte[][]{new byte[]{2,0,90,0}}});
+                if(await System.Threading.Tasks.Task.WhenAny(task,System.Threading.Tasks.Task.Delay(8000))!=task)
+                    throw new Exception("Trade send timeout failed");
+                await task;
+                if(connection.IsConnected || field.GetValue(connection)!=null || gate.CurrentCount!=0)
+                    throw new Exception("Timed-out send did not disconnect safely or released unacquired lock");
+            }
+            finally {gate.Release();}
+            File.WriteAllText("Builds/TradeClient/network-regression.txt","PASS: stalled trade send exits, disconnects, and preserves send-lock ownership.");
+            Debug.Log("PASS: trade timeout network regression.");
+        }
+        catch(Exception error) {Debug.LogException(error);}
     }
 
 }

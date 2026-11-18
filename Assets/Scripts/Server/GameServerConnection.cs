@@ -52,17 +52,19 @@ public class GameServerConnection : MonoBehaviour
                 ClientPacket incomingPacket =
                     await packetReader.ReadPacketAsync();
 
+                if (_client == null) break; // Ignore a response queued before a trade timeout.
                 ClientPacketHandler.Handle(incomingPacket);
             }
         }
 
         catch (System.Exception ex)
         {
+            bool tradeAlreadyDisconnected = _client == null;
             NpcHtmlWindow.Instance?.Hide();
             _client?.Close();
             _client = null;
             MerchantPurchaseState.Disconnected();
-            TradeWindowUI.Instance?.Disconnected();
+            if (!tradeAlreadyDisconnected) TradeWindowUI.Instance?.Disconnected();
             NotifyAttackConnectionLost();
             Debug.LogException(ex);
         }
@@ -1392,29 +1394,45 @@ public class GameServerConnection : MonoBehaviour
 
     public async void SendTradeInvitation(int targetId)
     {
-        await tradeSendLock.WaitAsync();
-        try
-        {
-            if (!IsConnected) throw new System.IO.IOException("Not connected");
-            // Target selection and request are ordered on the same connection.
-            await _client.GetStream().WriteAsync(BuildPacket(47, targetId.ToString()));
-            await _client.GetStream().WriteAsync(BuildPacket(90, string.Empty));
-        }
-        catch (System.Exception ex) { Debug.LogWarning(ex.Message); TradeWindowUI.Instance?.Disconnected(); }
-        finally { tradeSendLock.Release(); }
+        await SendTradeFramesAsync(BuildPacket(47, targetId.ToString()), BuildPacket(90, string.Empty));
     }
 
     public async void SendTradePacket(ushort type, string payload)
     {
         if (type != 92 && type != 93 && type != 95 && type != 96 && type != 98 && type != 100) return;
-        await tradeSendLock.WaitAsync();
+        await SendTradeFramesAsync(BuildPacket(type, payload));
+    }
+
+    private async System.Threading.Tasks.Task SendTradeFramesAsync(params byte[][] packets)
+    {
+        var client = _client;
+        bool acquired = false;
+        using var timeout = new System.Threading.CancellationTokenSource(System.TimeSpan.FromSeconds(5));
+        // Closing also interrupts writes on runtimes that cannot cancel an in-flight socket write.
+        using var abort = timeout.Token.Register(() => client?.Close());
         try
         {
-            if (!IsConnected) throw new System.IO.IOException("Not connected");
-            await _client.GetStream().WriteAsync(BuildPacket(type, payload));
+            await tradeSendLock.WaitAsync(timeout.Token);
+            acquired = true;
+            if (client == null || !ReferenceEquals(client, _client) || !client.Connected)
+                throw new System.IO.IOException("Not connected");
+            foreach (byte[] packet in packets)
+                await client.GetStream().WriteAsync(packet, 0, packet.Length, timeout.Token);
         }
-        catch (System.Exception ex) { Debug.LogWarning(ex.Message); TradeWindowUI.Instance?.Disconnected(); }
-        finally { tradeSendLock.Release(); }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning("Trade send failed: " + ex.Message);
+            if (ReferenceEquals(client, _client)) DisconnectForTradeFailure();
+        }
+        finally { if (acquired) tradeSendLock.Release(); }
+    }
+
+    public void DisconnectForTradeFailure()
+    {
+        var client = _client;
+        _client = null;
+        client?.Close();
+        TradeWindowUI.Instance?.Disconnected();
     }
 
     private byte[] BuildPacket(ushort packetType, string data)
