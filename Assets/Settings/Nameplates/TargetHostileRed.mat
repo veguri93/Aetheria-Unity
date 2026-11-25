@@ -106,13 +106,13 @@ Material:
     - _WeightBold: 0.75
     - _WeightNormal: 0
     m_Colors:
-    - _BorderColor: {r: 0.26, g: 0.28, b: 0.31, a: 1}
+    - _BorderColor: {r: 0.99, g: 0.44, b: 0.085, a: 1}
     - _ClipRect: {r: -32767, g: -32767, b: 32767, a: 32767}
-    - _EnergyColor: {r: 0.95, g: 0.18, b: 0.24, a: 1}
+    - _EnergyColor: {r: 1, g: 0.50, b: 0.09, a: 1}
     - _EnvMatrixRotation: {r: 0, g: 0, b: 0, a: 0}
     - _FaceColor: {r: 1, g: 0.28, b: 0.32, a: 1}
     - _GlowColor: {r: 1, g: 0.06, b: 0.1, a: 0.65}
-    - _HighlightColor: {r: 0.68, g: 0.71, b: 0.74, a: 1}
+    - _HighlightColor: {r: 1, g: 0.88, b: 0.53, a: 1}
     - _MaskCoord: {r: 0, g: 0, b: 32767, a: 32767}
     - _OutlineColor: {r: 0.25, g: 0.015, b: 0.025, a: 1}
     - _ReflectFaceColor: {r: 0, g: 0, b: 0, a: 1}

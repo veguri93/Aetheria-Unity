@@ -37,52 +37,33 @@ Shader "Aetheria/Nameplates/Contained Fantasy Energy"
             {
                 v2f o; o.pos = UnityObjectToClipPos(v.vertex); o.uv = v.uv; return o;
             }
+            // The spur faces away from the name. Its opposite end is a small jewel.
             float arrowDistance(float2 p)
             {
-                // Broad, gently notched arrowhead with rounded lips and a narrow nose.
-                // This is a filled plate, rather than a font stroke or solid triangle.
-                float2 v[8];
-                v[0]=float2(-.58,.64); v[1]=float2(-.30,.60);
-                v[2]=float2(.64,.075); v[3]=float2(.70,0);
-                v[4]=float2(.64,-.075); v[5]=float2(-.30,-.60);
-                v[6]=float2(-.58,-.64); v[7]=float2(-.08,0);
-                float d = dot(p-v[0],p-v[0]); float s=1;
-                [unroll] for(int i=0;i<8;i++)
-                {
-                    int j=i==0?7:i-1;
-                    float2 e=v[j]-v[i], w=p-v[i];
-                    float2 b=w-e*saturate(dot(w,e)/dot(e,e));
-                    d=min(d,dot(b,b));
-                    bool3 c=bool3(p.y>=v[i].y,p.y<v[j].y,e.x*w.y>e.y*w.x);
-                    if(all(c)||all(!c)) s=-s;
-                }
-                return s*sqrt(d)-_Roundness;
+                float x = p.x;
+                float y = abs(p.y);
+                float sweep = smoothstep(-0.52, 0.53, x);
+                float ridge = 0.60 * sweep;
+                float blade = (abs(y - ridge) - (0.014 + 0.072 * (1.0 - sweep))) * 0.76;
+                blade = max(blade, max(-0.55 - x, x - 0.54));
+                float spur = max(abs(x + 0.51) * 0.32 + y - 0.094, -0.80 - x);
+                float diamond = (abs(x - 0.37) / 0.23 + y / 0.155 - 1.0) * 0.13;
+                return min(min(blade, spur), diamond);
             }
             half4 frag(v2f i):SV_Target
             {
-                float2 p=i.uv*2-1; p.x*=_Direction;
-                float d=arrowDistance(p);
-                float aa=max(fwidth(d),.004);
-                float body=1-smoothstep(-aa,aa,d);
-                float inner=1-smoothstep(-_BorderWidth-aa,-_BorderWidth+aa,d);
-                // Stable neutral metal: no time-dependent color or opacity here.
-                float light=saturate(.58+p.y*.38-p.x*.14);
-                float lip=exp2(-1900*(d+.025)*(d+.025));
-                float3 metal=lerp(_BorderColor.rgb*.72,_HighlightColor.rgb,light*.72+lip*.22);
-                float t=_AetheriaTargetArrowTime*_Speed+_Phase;
-                float bend=sin(p.y*7+t*1.4)*.35;
-                float flow=pow(.5+.5*sin(p.x*12-p.y*4-t*5+bend),5);
-                float filament=exp2(-100*(p.y-.13*sin(p.x*7-t*2))*(p.y-.13*sin(p.x*7-t*2)));
-                float breath=1+_Breathing*sin(t*2.0);
-                float energy=(.46+_Intensity*(.22+.24*flow+.13*filament))*breath;
-                float3 interior=_EnergyColor.rgb*energy;
-                // Fine, pale highlights read as energy under a polished surface.
-                interior+=_EnergyColor.rgb*flow*.10;
-                float3 rgb=lerp(metal,interior,inner);
-                float halo=(1-body)*exp2(-max(d,0)*34)*_Glow*(.78+.08*sin(t*2));
-                float coverage=saturate(body+halo);
-                rgb=(rgb*body+_EnergyColor.rgb*halo)/max(coverage,.0001);
-                return half4(rgb,coverage*_Opacity);
+                float2 p = i.uv * 2.0 - 1.0;
+                p.x *= _Direction;
+                float d = arrowDistance(p);
+                float aa = max(fwidth(d) * 0.55, 0.006);
+                float body = 1.0 - smoothstep(-aa, aa, d);
+                float bevel = smoothstep(-0.014, 0.069, -d);
+                float facet = saturate(0.69 + p.y * 0.48 - p.x * 0.18);
+                float3 metal = lerp(_BorderColor.rgb, _HighlightColor.rgb, bevel * facet);
+                float halo = _Glow * exp2(-max(d, 0.0) * 24.0) * (1.0 - body);
+                float coverage = body + halo;
+                float3 rgb = (metal * body + _EnergyColor.rgb * halo) / max(coverage, 0.0001);
+                return half4(rgb, coverage * _Opacity);
             }
             ENDCG
         }
